@@ -22,7 +22,7 @@ Tech Stack
 Run locally
 
 ```bash
-git clone https://github.com/<your-name>/web-mc-js.git
+git clone https://github.com/2to3odo3-glitch/Web-Minecraft-JS.git
 cd web-mc-js
 # Install a simple static server (optional)
 npm install -g serve
