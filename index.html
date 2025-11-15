@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,45 +8,47 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="overlay" class="overlay">
+    <div id="gameContainer" class="game-container" aria-hidden="true"></div>
+
+    <div id="overlay" class="overlay" role="dialog" aria-labelledby="overlayTitle">
       <div class="overlay-content">
-        <div class="language-picker">
+        <div class="language-picker" role="group" aria-labelledby="languageLabel">
           <label id="languageLabel" for="languageSelect"></label>
           <select id="languageSelect"></select>
         </div>
 
-        <div class="logo-wrapper">
+        <header class="logo-wrapper" role="presentation">
           <div class="minecraft-logo">
             <span id="overlayTitle" class="logo-text">Minecraft</span>
             <span id="splashText" class="splash-text">It's finished!</span>
           </div>
-        </div>
+        </header>
 
-        <div class="menu-wrapper">
-          <div class="menu-column">
-            <button id="singleplayerButton" class="menu-button primary">
+        <main class="menu-wrapper" role="menu">
+          <div class="menu-column" role="presentation">
+            <button id="singleplayerButton" class="menu-button primary" type="button">
               Singleplayer
             </button>
-            <button id="playOnlineButton" class="menu-button">
+            <button id="playOnlineButton" class="menu-button" type="button">
               Play Online
             </button>
-            <button id="multiplayerButton" class="menu-button">
+            <button id="multiplayerButton" class="menu-button" type="button">
               Multiplayer
             </button>
-            <button id="optionsButton" class="menu-button">
+            <button id="optionsButton" class="menu-button" type="button">
               Options...
             </button>
-            <button id="quitButton" class="menu-button">
+            <button id="quitButton" class="menu-button" type="button">
               Quit Game
             </button>
-            <div id="menuStatus" class="menu-status"></div>
+            <div id="menuStatus" class="menu-status" role="status" aria-live="polite"></div>
           </div>
-          <div class="side-column">
+          <aside class="side-column" aria-labelledby="optionsTitle">
             <div class="mojang-emblem" aria-hidden="true">
               <span class="mojang-word mark">MOJANG</span>
               <span class="mojang-word studios">STUDIOS</span>
             </div>
-            <div id="helpPanel" class="help-panel">
+            <section id="helpPanel" class="help-panel">
               <h2 id="optionsTitle"></h2>
               <p id="overlayIntro" class="help-subtitle"></p>
               <p id="helpMouse">鼠标：视角</p>
@@ -60,17 +62,158 @@
               <p id="helpTouchMove" class="mobile-hint">触控左摇杆：移动</p>
               <p id="helpTouchLook" class="mobile-hint">触控右侧：观察 / 交互</p>
               <p id="helpTouchActions" class="mobile-hint">触控按钮：跳跃、破坏、放置</p>
-            </div>
-          </div>
-        </div>
+            </section>
+          </aside>
+        </main>
 
-        <div id="lanPanel" class="lan-panel hidden" role="region" aria-live="polite">
+        <section
+          id="minecraftHighlights"
+          class="feature-section"
+          role="region"
+          aria-labelledby="highlightsTitle"
+        >
+          <div class="section-header">
+            <h2 id="highlightsTitle" class="section-title">Minecraft Highlights</h2>
+            <p id="highlightsIntro" class="section-description">
+              Discover iconic adventures before you step into the world.
+            </p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card" aria-labelledby="featureBiomesTitle">
+              <div class="feature-card-header">
+                <span class="feature-icon" aria-hidden="true">🌄</span>
+                <h3 id="featureBiomesTitle" class="feature-title">Explore Biomes</h3>
+              </div>
+              <p id="featureBiomesText" class="feature-text">
+                Trek across snowy peaks, dive into lush caves, and gather treasures from
+                every biome.
+              </p>
+              <button
+                id="featureBiomesButton"
+                class="card-button"
+                type="button"
+                aria-describedby="featureBiomesText"
+              >
+                Learn more
+              </button>
+            </article>
+            <article class="feature-card" aria-labelledby="featureRedstoneTitle">
+              <div class="feature-card-header">
+                <span class="feature-icon" aria-hidden="true">⚙️</span>
+                <h3 id="featureRedstoneTitle" class="feature-title">Redstone Lab</h3>
+              </div>
+              <p id="featureRedstoneText" class="feature-text">
+                Build automated farms and clever contraptions with redstone dust,
+                pistons, and observers.
+              </p>
+              <button
+                id="featureRedstoneButton"
+                class="card-button"
+                type="button"
+                aria-describedby="featureRedstoneText"
+              >
+                Learn more
+              </button>
+            </article>
+            <article class="feature-card" aria-labelledby="featureNetherTitle">
+              <div class="feature-card-header">
+                <span class="feature-icon" aria-hidden="true">🔥</span>
+                <h3 id="featureNetherTitle" class="feature-title">Nether Expedition</h3>
+              </div>
+              <p id="featureNetherText" class="feature-text">
+                Brave ghasts and bastions to collect blazing loot and rare alchemy
+                ingredients.
+              </p>
+              <button
+                id="featureNetherButton"
+                class="card-button"
+                type="button"
+                aria-describedby="featureNetherText"
+              >
+                Learn more
+              </button>
+            </article>
+          </div>
+        </section>
+
+        <section
+          id="minecraftTips"
+          class="feature-section accent"
+          role="region"
+          aria-labelledby="tipTitle"
+        >
+          <div class="tip-panel">
+            <div class="tip-header">
+              <span class="feature-icon" aria-hidden="true">💡</span>
+              <div class="tip-header-copy">
+                <h2 id="tipTitle" class="section-title">Adventurer's Tip</h2>
+                <p id="tipLead" class="section-description">
+                  Keep these Minecraft pointers handy as you explore.
+                </p>
+              </div>
+              <button id="tipRefreshButton" class="card-button ghost" type="button">
+                Next tip
+              </button>
+            </div>
+            <p id="tipContent" class="tip-content">
+              Craft a shield before entering caves to block skeleton arrows.
+            </p>
+          </div>
+        </section>
+
+        <section
+          id="minecraftTimeline"
+          class="feature-section"
+          role="region"
+          aria-labelledby="timelineTitle"
+        >
+          <div class="section-header">
+            <h2 id="timelineTitle" class="section-title">Minecraft Milestones</h2>
+            <p id="timelineIntro" class="section-description">
+              A quick tour through the updates that shaped the blocky universe.
+            </p>
+          </div>
+          <ul class="timeline-list">
+            <li class="timeline-item">
+              <span class="timeline-year">2009</span>
+              <p id="timelineAlpha" class="timeline-text">
+                Classic survival alpha laid the foundation for infinite worlds.
+              </p>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-year">2011</span>
+              <p id="timelineAdventure" class="timeline-text">
+                The Adventure Update introduced hunger, strongholds, and the End.
+              </p>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-year">2016</span>
+              <p id="timelineEnd" class="timeline-text">
+                The End update added elytra flights and mysterious End Cities.
+              </p>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-year">2020</span>
+              <p id="timelineNether" class="timeline-text">
+                The Nether Update delivered bastions, piglins, and netherite gear.
+              </p>
+            </li>
+          </ul>
+        </section>
+
+        <section
+          id="lanPanel"
+          class="lan-panel hidden"
+          role="region"
+          aria-live="polite"
+          aria-labelledby="lanHostTitle"
+        >
           <div class="lan-column">
             <h2 id="lanHostTitle">Host a LAN world</h2>
             <p id="lanHostHint" class="lan-hint">
               Share the offer below with players on the same network.
             </p>
-            <button id="lanCreateOffer" class="menu-button slim">Create Offer</button>
+            <button id="lanCreateOffer" class="menu-button slim" type="button">Create Offer</button>
             <textarea
               id="lanOfferOutput"
               class="lan-text"
@@ -134,9 +277,9 @@
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="footer">
+        <footer class="footer">
           <div class="footer-left">
             <span id="editionLabel">Collector's Edition</span>
             <span id="shaderLabel">FOR Shaders</span>
@@ -145,11 +288,11 @@
             <span id="versionLabel">Minecraft 1.8.8</span>
             <span id="resourceLabel">Resources: Mojang AB</span>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
 
-    <div id="hud" class="hud hidden">
+    <div id="hud" class="hud hidden" aria-live="polite">
       <div class="crosshair"></div>
       <div id="blockSelector" class="block-selector"></div>
       <div class="hud-top-left">

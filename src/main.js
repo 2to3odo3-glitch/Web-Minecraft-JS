@@ -45,6 +45,18 @@ const TOOLS = [
   { id: 'shears', type: 'shears', speed: 1.2, efficiency: 3.1, labelKey: 'toolShears' },
 ];
 
+const TIP_ROTATION_MS = 12000;
+const tipItems = [
+  { key: 'tipRedstone', icon: '⚡' },
+  { key: 'tipFarming', icon: '🌾' },
+  { key: 'tipExploration', icon: '🧭' },
+  { key: 'tipDefense', icon: '🛡️' },
+  { key: 'tipTrading', icon: '💎' },
+];
+
+let tipIndex = 0;
+let tipRotationTimer = null;
+
 let lanMultiplayer = null;
 let currentPeerList = [];
 
@@ -54,7 +66,10 @@ renderer.setPixelRatio(
 );
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+
+const gameContainer = document.getElementById('gameContainer');
+const renderTarget = gameContainer ?? document.body;
+renderTarget.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
@@ -184,6 +199,49 @@ const breakButtonEl = document.getElementById('breakButton');
 const placeButtonEl = document.getElementById('placeButton');
 const toolButtonEl = document.getElementById('toolButton');
 const modeButtonEl = document.getElementById('modeButton');
+const highlightsTitleEl = document.getElementById('highlightsTitle');
+const highlightsIntroEl = document.getElementById('highlightsIntro');
+const featureCards = [
+  {
+    titleEl: document.getElementById('featureBiomesTitle'),
+    textEl: document.getElementById('featureBiomesText'),
+    buttonEl: document.getElementById('featureBiomesButton'),
+    titleKey: 'highlightBiomesTitle',
+    textKey: 'highlightBiomesText',
+    statusKey: 'highlightBiomesStatus',
+  },
+  {
+    titleEl: document.getElementById('featureRedstoneTitle'),
+    textEl: document.getElementById('featureRedstoneText'),
+    buttonEl: document.getElementById('featureRedstoneButton'),
+    titleKey: 'highlightRedstoneTitle',
+    textKey: 'highlightRedstoneText',
+    statusKey: 'highlightRedstoneStatus',
+  },
+  {
+    titleEl: document.getElementById('featureNetherTitle'),
+    textEl: document.getElementById('featureNetherText'),
+    buttonEl: document.getElementById('featureNetherButton'),
+    titleKey: 'highlightNetherTitle',
+    textKey: 'highlightNetherText',
+    statusKey: 'highlightNetherStatus',
+  },
+];
+const tipTitleEl = document.getElementById('tipTitle');
+const tipLeadEl = document.getElementById('tipLead');
+const tipContentEl = document.getElementById('tipContent');
+const tipRefreshButton = document.getElementById('tipRefreshButton');
+const timelineTitleEl = document.getElementById('timelineTitle');
+const timelineIntroEl = document.getElementById('timelineIntro');
+const timelineEntries = [
+  { textEl: document.getElementById('timelineAlpha'), key: 'timelineAlpha' },
+  {
+    textEl: document.getElementById('timelineAdventure'),
+    key: 'timelineAdventure',
+  },
+  { textEl: document.getElementById('timelineEnd'), key: 'timelineEnd' },
+  { textEl: document.getElementById('timelineNether'), key: 'timelineNether' },
+];
 
 function readStoredLanguage() {
   try {
@@ -216,6 +274,36 @@ SUPPORTED_LANGUAGES.forEach((language) => {
 
 function translate(key, replacements) {
   return getMessage(currentLanguage, key, replacements);
+}
+
+function updateTipText() {
+  if (!tipContentEl || tipItems.length === 0) return;
+  const tip = tipItems[tipIndex % tipItems.length];
+  const text = translate(tip.key);
+  const icon = tip.icon ?? '';
+  tipContentEl.textContent = icon ? `${icon} ${text}` : text;
+}
+
+function restartTipRotation() {
+  if (tipRotationTimer) {
+    clearInterval(tipRotationTimer);
+    tipRotationTimer = null;
+  }
+  if (tipItems.length > 1) {
+    tipRotationTimer = setInterval(() => {
+      tipIndex = (tipIndex + 1) % tipItems.length;
+      updateTipText();
+    }, TIP_ROTATION_MS);
+  }
+}
+
+function advanceTip(manual = false) {
+  if (tipItems.length === 0) return;
+  tipIndex = (tipIndex + 1) % tipItems.length;
+  updateTipText();
+  if (manual) {
+    restartTipRotation();
+  }
 }
 
 let lastSaveMessage = '';
@@ -646,6 +734,24 @@ function applyTranslations() {
       lastLanStatusKey,
       lastLanStatusReplacements
     );
+  if (highlightsTitleEl)
+    highlightsTitleEl.textContent = translate('highlightsTitle');
+  if (highlightsIntroEl)
+    highlightsIntroEl.textContent = translate('highlightsIntro');
+  featureCards.forEach((card) => {
+    if (card.titleEl) card.titleEl.textContent = translate(card.titleKey);
+    if (card.textEl) card.textEl.textContent = translate(card.textKey);
+    if (card.buttonEl) card.buttonEl.textContent = translate('highlightAction');
+  });
+  if (tipTitleEl) tipTitleEl.textContent = translate('tipTitle');
+  if (tipLeadEl) tipLeadEl.textContent = translate('tipLead');
+  if (tipRefreshButton) tipRefreshButton.textContent = translate('tipRefresh');
+  updateTipText();
+  if (timelineTitleEl) timelineTitleEl.textContent = translate('timelineTitle');
+  if (timelineIntroEl) timelineIntroEl.textContent = translate('timelineIntro');
+  timelineEntries.forEach((entry) => {
+    if (entry.textEl) entry.textEl.textContent = translate(entry.key);
+  });
   if (jumpButtonEl) jumpButtonEl.textContent = translate('mobileJump');
   if (breakButtonEl) breakButtonEl.textContent = translate('mobileBreak');
   if (placeButtonEl) placeButtonEl.textContent = translate('mobilePlace');
@@ -685,6 +791,7 @@ languageSelectEl?.addEventListener('change', (event) => {
 
 applyTranslations();
 rebuildBlockSelector();
+restartTipRotation();
 
 const keys = {
   KeyW: false,
@@ -755,6 +862,17 @@ function exitGameplay() {
   mobileMoveVector.y = 0;
   cancelBreakBlock();
 }
+
+featureCards.forEach((card) => {
+  card.buttonEl?.addEventListener('click', () => {
+    setMenuStatus('', { key: card.statusKey, replacements: {} });
+  });
+});
+
+tipRefreshButton?.addEventListener('click', () => {
+  advanceTip(true);
+  setMenuStatus('', { key: 'tipStatusRefreshed', replacements: {} });
+});
 
 singleplayerButton?.addEventListener('click', () => {
   setMenuStatus('', null);
