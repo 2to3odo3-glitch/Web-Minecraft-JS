@@ -25,6 +25,7 @@ const MAX_INTERACT_DISTANCE = 6.2;
 const CREATIVE_FLY_SPEED = 10;
 const CREATIVE_FAST_MULTIPLIER = 1.6;
 const GRAVITY = 32;
+const PLAY_ONLINE_URL = 'https://2to3odo3-glitch.github.io/Web-Minecraft-JS/';
 
 const TOOLS = [
   { id: 'hand', type: null, speed: 0.8, efficiency: 1.1, labelKey: 'toolHand' },
@@ -81,6 +82,7 @@ const overlayTitleEl = document.getElementById('overlayTitle');
 const splashTextEl = document.getElementById('splashText');
 const overlayIntroEl = document.getElementById('overlayIntro');
 const singleplayerButton = document.getElementById('singleplayerButton');
+const playOnlineButton = document.getElementById('playOnlineButton');
 const multiplayerButton = document.getElementById('multiplayerButton');
 const optionsButton = document.getElementById('optionsButton');
 const quitButton = document.getElementById('quitButton');
@@ -295,6 +297,8 @@ function applyTranslations() {
   if (optionsTitleEl) optionsTitleEl.textContent = translate('optionsTitle');
   if (singleplayerButton)
     singleplayerButton.textContent = translate('menuSingleplayer');
+  if (playOnlineButton)
+    playOnlineButton.textContent = translate('menuPlayOnline');
   if (multiplayerButton)
     multiplayerButton.textContent = translate('menuMultiplayer');
   if (optionsButton) optionsButton.textContent = translate('menuOptions');
@@ -402,6 +406,17 @@ document.addEventListener('keyup', (event) => {
 singleplayerButton?.addEventListener('click', () => {
   setMenuStatus('', null);
   controls.lock();
+});
+
+playOnlineButton?.addEventListener('click', () => {
+  const onlineWindow = window.open(PLAY_ONLINE_URL, '_blank', 'noopener');
+  if (onlineWindow) {
+    onlineWindow.opener = null;
+  }
+  setMenuStatus(translate('playOnlineStatus'), {
+    key: 'playOnlineStatus',
+    replacements: {},
+  });
 });
 
 multiplayerButton?.addEventListener('click', () => {
