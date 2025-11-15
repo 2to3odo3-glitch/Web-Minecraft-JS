@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,45 +8,47 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="overlay" class="overlay">
+    <div id="gameContainer" class="game-container" aria-hidden="true"></div>
+
+    <div id="overlay" class="overlay" role="dialog" aria-labelledby="overlayTitle">
       <div class="overlay-content">
-        <div class="language-picker">
+        <div class="language-picker" role="group" aria-labelledby="languageLabel">
           <label id="languageLabel" for="languageSelect"></label>
           <select id="languageSelect"></select>
         </div>
 
-        <div class="logo-wrapper">
+        <header class="logo-wrapper" role="presentation">
           <div class="minecraft-logo">
             <span id="overlayTitle" class="logo-text">Minecraft</span>
             <span id="splashText" class="splash-text">It's finished!</span>
           </div>
-        </div>
+        </header>
 
-        <div class="menu-wrapper">
-          <div class="menu-column">
-            <button id="singleplayerButton" class="menu-button primary">
+        <main class="menu-wrapper" role="menu">
+          <div class="menu-column" role="presentation">
+            <button id="singleplayerButton" class="menu-button primary" type="button">
               Singleplayer
             </button>
-            <button id="playOnlineButton" class="menu-button">
+            <button id="playOnlineButton" class="menu-button" type="button">
               Play Online
             </button>
-            <button id="multiplayerButton" class="menu-button">
+            <button id="multiplayerButton" class="menu-button" type="button">
               Multiplayer
             </button>
-            <button id="optionsButton" class="menu-button">
+            <button id="optionsButton" class="menu-button" type="button">
               Options...
             </button>
-            <button id="quitButton" class="menu-button">
+            <button id="quitButton" class="menu-button" type="button">
               Quit Game
             </button>
-            <div id="menuStatus" class="menu-status"></div>
+            <div id="menuStatus" class="menu-status" role="status" aria-live="polite"></div>
           </div>
-          <div class="side-column">
+          <aside class="side-column" aria-labelledby="optionsTitle">
             <div class="mojang-emblem" aria-hidden="true">
               <span class="mojang-word mark">MOJANG</span>
               <span class="mojang-word studios">STUDIOS</span>
             </div>
-            <div id="helpPanel" class="help-panel">
+            <section id="helpPanel" class="help-panel">
               <h2 id="optionsTitle"></h2>
               <p id="overlayIntro" class="help-subtitle"></p>
               <p id="helpMouse">鼠标：视角</p>
@@ -60,17 +62,23 @@
               <p id="helpTouchMove" class="mobile-hint">触控左摇杆：移动</p>
               <p id="helpTouchLook" class="mobile-hint">触控右侧：观察 / 交互</p>
               <p id="helpTouchActions" class="mobile-hint">触控按钮：跳跃、破坏、放置</p>
-            </div>
-          </div>
-        </div>
+            </section>
+          </aside>
+        </main>
 
-        <div id="lanPanel" class="lan-panel hidden" role="region" aria-live="polite">
+        <section
+          id="lanPanel"
+          class="lan-panel hidden"
+          role="region"
+          aria-live="polite"
+          aria-labelledby="lanHostTitle"
+        >
           <div class="lan-column">
             <h2 id="lanHostTitle">Host a LAN world</h2>
             <p id="lanHostHint" class="lan-hint">
               Share the offer below with players on the same network.
             </p>
-            <button id="lanCreateOffer" class="menu-button slim">Create Offer</button>
+            <button id="lanCreateOffer" class="menu-button slim" type="button">Create Offer</button>
             <textarea
               id="lanOfferOutput"
               class="lan-text"
@@ -134,9 +142,9 @@
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="footer">
+        <footer class="footer">
           <div class="footer-left">
             <span id="editionLabel">Collector's Edition</span>
             <span id="shaderLabel">FOR Shaders</span>
@@ -145,11 +153,11 @@
             <span id="versionLabel">Minecraft 1.8.8</span>
             <span id="resourceLabel">Resources: Mojang AB</span>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
 
-    <div id="hud" class="hud hidden">
+    <div id="hud" class="hud hidden" aria-live="polite">
       <div class="crosshair"></div>
       <div id="blockSelector" class="block-selector"></div>
       <div class="hud-top-left">
