@@ -56,8 +56,19 @@ controls.getObject().position.copy(spawnPosition);
 
 const overlayEl = document.getElementById('overlay');
 const overlayTitleEl = document.getElementById('overlayTitle');
+const splashTextEl = document.getElementById('splashText');
 const overlayIntroEl = document.getElementById('overlayIntro');
-const startButton = document.getElementById('startButton');
+const singleplayerButton = document.getElementById('singleplayerButton');
+const multiplayerButton = document.getElementById('multiplayerButton');
+const optionsButton = document.getElementById('optionsButton');
+const quitButton = document.getElementById('quitButton');
+const menuStatusEl = document.getElementById('menuStatus');
+const optionsTitleEl = document.getElementById('optionsTitle');
+const helpPanelEl = document.getElementById('helpPanel');
+const editionLabelEl = document.getElementById('editionLabel');
+const shaderLabelEl = document.getElementById('shaderLabel');
+const versionLabelEl = document.getElementById('versionLabel');
+const resourceLabelEl = document.getElementById('resourceLabel');
 const helpMouseEl = document.getElementById('helpMouse');
 const helpMovementEl = document.getElementById('helpMovement');
 const helpBreakEl = document.getElementById('helpBreak');
@@ -133,6 +144,9 @@ let lastSaveTranslationKey = null;
 let lastSaveReplacements = {};
 let saveStatusTimeout = null;
 
+let menuStatusMessage = '';
+let menuStatusMetadata = null;
+
 function showSaveStatus(message, isError = false, metadata = null) {
   if (!saveStatusEl) return;
   lastSaveMessage = message;
@@ -146,6 +160,24 @@ function showSaveStatus(message, isError = false, metadata = null) {
   saveStatusTimeout = setTimeout(() => {
     saveStatusEl.classList.remove('visible');
   }, 1600);
+}
+
+function refreshMenuStatus() {
+  if (!menuStatusEl) return;
+  if (menuStatusMetadata?.key) {
+    menuStatusEl.textContent = translate(
+      menuStatusMetadata.key,
+      menuStatusMetadata.replacements ?? {}
+    );
+  } else {
+    menuStatusEl.textContent = menuStatusMessage;
+  }
+}
+
+function setMenuStatus(message, metadata = null) {
+  menuStatusMessage = message;
+  menuStatusMetadata = metadata;
+  refreshMenuStatus();
 }
 
 function translate(key, replacements) {
@@ -223,8 +255,15 @@ function setCurrentBlockType(typeId) {
 
 function applyTranslations() {
   if (overlayTitleEl) overlayTitleEl.textContent = translate('overlayTitle');
+  if (splashTextEl) splashTextEl.textContent = translate('splashText');
   if (overlayIntroEl) overlayIntroEl.textContent = translate('overlayIntro');
-  if (startButton) startButton.textContent = translate('startButton');
+  if (optionsTitleEl) optionsTitleEl.textContent = translate('optionsTitle');
+  if (singleplayerButton)
+    singleplayerButton.textContent = translate('menuSingleplayer');
+  if (multiplayerButton)
+    multiplayerButton.textContent = translate('menuMultiplayer');
+  if (optionsButton) optionsButton.textContent = translate('menuOptions');
+  if (quitButton) quitButton.textContent = translate('menuQuit');
   if (helpMouseEl) helpMouseEl.textContent = translate('helpMouse');
   if (helpMovementEl) helpMovementEl.textContent = translate('helpMovement');
   if (helpBreakEl) helpBreakEl.textContent = translate('helpBreak');
@@ -233,7 +272,17 @@ function applyTranslations() {
     helpSelectEl.textContent = translate('helpSelect', {
       maxBlock: BLOCK_TYPES.length,
     });
+  if (editionLabelEl) editionLabelEl.textContent = translate('editionLabel');
+  if (shaderLabelEl) shaderLabelEl.textContent = translate('shaderLabel');
+  if (versionLabelEl) versionLabelEl.textContent = translate('versionLabel');
+  if (resourceLabelEl) resourceLabelEl.textContent = translate('resourceLabel');
   if (languageLabelEl) languageLabelEl.textContent = translate('languageLabel');
+  if (optionsButton && helpPanelEl)
+    optionsButton.setAttribute(
+      'aria-expanded',
+      String(!helpPanelEl.classList.contains('collapsed'))
+    );
+  refreshMenuStatus();
 }
 
 applyTranslations();
@@ -273,8 +322,31 @@ document.addEventListener('keyup', (event) => {
   handleKeyChange(event, false);
 });
 
-startButton?.addEventListener('click', () => {
+singleplayerButton?.addEventListener('click', () => {
+  setMenuStatus('', null);
   controls.lock();
+});
+
+multiplayerButton?.addEventListener('click', () => {
+  setMenuStatus(translate('multiplayerUnavailable'), {
+    key: 'multiplayerUnavailable',
+    replacements: {},
+  });
+});
+
+optionsButton?.addEventListener('click', () => {
+  if (!helpPanelEl) return;
+  const collapsed = helpPanelEl.classList.toggle('collapsed');
+  optionsButton.setAttribute('aria-expanded', String(!collapsed));
+  const key = collapsed ? 'optionsHidden' : 'optionsShown';
+  setMenuStatus(translate(key), { key, replacements: {} });
+});
+
+quitButton?.addEventListener('click', () => {
+  setMenuStatus(translate('quitUnavailable'), {
+    key: 'quitUnavailable',
+    replacements: {},
+  });
 });
 
 controls.addEventListener('lock', () => {

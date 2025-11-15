@@ -8,19 +8,62 @@
   </head>
   <body>
     <div id="overlay" class="overlay">
-      <div class="language-picker">
-        <label id="languageLabel" for="languageSelect"></label>
-        <select id="languageSelect"></select>
-      </div>
-      <h1 id="overlayTitle">Web Minecraft JS</h1>
-      <p id="overlayIntro">点击下方按钮开始体验。</p>
-      <button id="startButton">开始游戏</button>
-      <div class="help-text">
-        <p id="helpMouse">鼠标：视角</p>
-        <p id="helpMovement">WASD：移动，空格：上升，Shift：下降</p>
-        <p id="helpBreak">左键：破坏方块</p>
-        <p id="helpPlace">右键：放置方块</p>
-        <p id="helpSelect">数字键 1-3：选择方块类型</p>
+      <div class="overlay-content">
+        <div class="language-picker">
+          <label id="languageLabel" for="languageSelect"></label>
+          <select id="languageSelect"></select>
+        </div>
+
+        <div class="logo-wrapper">
+          <div class="minecraft-logo">
+            <span id="overlayTitle" class="logo-text">Minecraft</span>
+            <span id="splashText" class="splash-text">It's finished!</span>
+          </div>
+        </div>
+
+        <div class="menu-wrapper">
+          <div class="menu-column">
+            <button id="singleplayerButton" class="menu-button primary">
+              Singleplayer
+            </button>
+            <button id="multiplayerButton" class="menu-button">
+              Multiplayer
+            </button>
+            <button id="optionsButton" class="menu-button">
+              Options...
+            </button>
+            <button id="quitButton" class="menu-button">
+              Quit Game
+            </button>
+            <div id="menuStatus" class="menu-status"></div>
+          </div>
+          <div class="side-column">
+            <div class="mojang-emblem" aria-hidden="true">
+              <span class="mojang-word mark">MOJANG</span>
+              <span class="mojang-word studios">STUDIOS</span>
+            </div>
+            <div id="helpPanel" class="help-panel">
+              <h2 id="optionsTitle"></h2>
+              <p id="overlayIntro" class="help-subtitle"></p>
+              <p id="helpMouse">鼠标：视角</p>
+              <p id="helpMovement">WASD：移动，空格：上升，Shift：下降</p>
+              <p id="helpBreak">左键：破坏方块</p>
+              <p id="helpPlace">右键：放置方块</p>
+              <p id="helpSelect">数字键 1-3：选择方块类型</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">
+            <span id="editionLabel">Collector's Edition</span>
+            <span id="shaderLabel">FOR Shaders</span>
+          </div>
+          <div class="footer-right">
+            <span id="versionLabel">Minecraft 1.8.8</span>
+            <span id="resourceLabel">Resources: Mojang AB</span>
+          </div>
+        </div>
       </div>
     </div>
 
