@@ -9,6 +9,7 @@ import {
   getMessage,
   validateLanguage,
 } from './i18n.js';
+import { BLOCK_TYPES } from './blocks.js';
 import { loadWorld, saveWorld } from './storage.js';
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -139,6 +140,14 @@ function showSaveStatus(message, isError = false, metadata = null) {
   lastSaveWasError = isError;
   lastSaveTranslationKey = metadata?.key ?? null;
   lastSaveReplacements = metadata?.replacements ?? {};
+const hudEl = document.getElementById('hud');
+const startButton = document.getElementById('startButton');
+const blockSelectorEl = document.getElementById('blockSelector');
+const saveStatusEl = document.getElementById('saveStatus');
+
+let saveStatusTimeout = null;
+function showSaveStatus(message, isError = false) {
+  if (!saveStatusEl) return;
   saveStatusEl.textContent = message;
   saveStatusEl.classList.toggle('error', isError);
   saveStatusEl.classList.add('visible');
@@ -164,6 +173,12 @@ function persistWorld() {
       key: 'saveError',
       replacements: {},
     });
+function persistWorld() {
+  const result = saveWorld(world.serialize());
+  if (result) {
+    showSaveStatus('已保存世界');
+  } else {
+    showSaveStatus('无法保存：本地存储不可用', true);
   }
 }
 
@@ -194,6 +209,7 @@ function rebuildBlockSelector() {
       index: index + 1,
       label: localizedLabel,
     });
+    label.textContent = `${index + 1}. ${type.label}`;
     option.appendChild(label);
 
     option.addEventListener('click', () => {
@@ -336,12 +352,14 @@ function pickBlock() {
     return hit;
   }
   return null;
+  return intersects[0] ?? null;
 }
 
 function tryBreakBlock() {
   const hit = pickBlock();
   if (!hit) return;
   const block = hit.block ?? hit.object?.userData?.block;
+  const block = hit.object.userData.block;
   if (!block) return;
   const changed = world.removeBlock(block.x, block.y, block.z);
   if (changed) {
@@ -356,6 +374,7 @@ function tryPlaceBlock() {
   const hit = pickBlock();
   if (!hit) return;
   const block = hit.block ?? hit.object?.userData?.block;
+  const block = hit.object.userData.block;
   if (!block) return;
   const face = hit.face;
   const object = hit.object;
@@ -403,3 +422,4 @@ showSaveStatus(translate('welcome'), false, {
   key: 'welcome',
   replacements: {},
 });
+showSaveStatus('欢迎来到方块世界');

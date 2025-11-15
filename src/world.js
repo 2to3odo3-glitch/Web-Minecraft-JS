@@ -43,6 +43,7 @@ export class World {
       for (const child of [...chunk.group.children]) {
         chunk.group.remove(child);
       }
+      chunk.group.clear();
       this.scene.remove(chunk.group);
     }
     this.chunks.clear();
@@ -106,6 +107,7 @@ export class World {
 
   #setBlockInternal(x, y, z, typeId, options = {}) {
     const { trackModification = true } = options;
+  #setBlockInternal(x, y, z, typeId) {
     if (y < 0 || y >= CHUNK_HEIGHT) return false;
     const { cx, cz, lx, lz } = this.worldToLocal(x, y, z);
     const chunk = this.ensureChunk(cx, cz);
@@ -150,6 +152,10 @@ export class World {
     return 'stone';
   }
 
+    this.markChunkDirty(chunk);
+    return true;
+  }
+
   markChunkDirty(chunk) {
     this.dirtyChunks.add(chunkKey(chunk.cx, chunk.cz));
   }
@@ -173,6 +179,9 @@ export class World {
     }
 
     const positionsByType = new Map();
+      chunk.group.clear();
+    }
+
     for (let y = 0; y < CHUNK_HEIGHT; y += 1) {
       for (let lz = 0; lz < CHUNK_SIZE; lz += 1) {
         for (let lx = 0; lx < CHUNK_SIZE; lx += 1) {
@@ -255,6 +264,28 @@ export class World {
         this.markChunkDirty(neighborChunk);
       }
     }
+          const material = this.getMaterial(typeId);
+          const mesh = new THREE.Mesh(this.blockGeometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          const worldX = chunk.cx * CHUNK_SIZE + lx;
+          const worldY = y;
+          const worldZ = chunk.cz * CHUNK_SIZE + lz;
+          mesh.position.set(
+            worldX + BLOCK_SIZE / 2,
+            worldY + BLOCK_SIZE / 2,
+            worldZ + BLOCK_SIZE / 2
+          );
+          mesh.userData.block = {
+            x: worldX,
+            y: worldY,
+            z: worldZ,
+            typeId,
+          };
+          chunk.group.add(mesh);
+        }
+      }
+    }
   }
 
   generateBaseWorld() {
@@ -278,6 +309,7 @@ export class World {
               this.#setBlockInternal(worldX, y, worldZ, typeId, {
                 trackModification: false,
               });
+              this.#setBlockInternal(worldX, y, worldZ, typeId);
             }
           }
         }
@@ -327,6 +359,27 @@ export class World {
       chunkSize: CHUNK_SIZE,
       chunkHeight: CHUNK_HEIGHT,
       modifiedBlocks,
+    const blocks = [];
+    for (const chunk of this.chunks.values()) {
+      for (let y = 0; y < CHUNK_HEIGHT; y += 1) {
+        for (let lz = 0; lz < CHUNK_SIZE; lz += 1) {
+          for (let lx = 0; lx < CHUNK_SIZE; lx += 1) {
+            const idx = chunk.index(lx, y, lz);
+            const typeId = chunk.blocks[idx];
+            if (!typeId) continue;
+            const worldX = chunk.cx * CHUNK_SIZE + lx;
+            const worldY = y;
+            const worldZ = chunk.cz * CHUNK_SIZE + lz;
+            blocks.push({ x: worldX, y: worldY, z: worldZ, typeId });
+          }
+        }
+      }
+    }
+    return {
+      version: 1,
+      chunkSize: CHUNK_SIZE,
+      chunkHeight: CHUNK_HEIGHT,
+      blocks,
     };
   }
 
@@ -351,6 +404,8 @@ export class World {
         }
         this.#setBlockInternal(x, y, z, typeId ?? null, { trackModification: true });
       }
+    if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
+      this.generateBaseWorld();
       this.update();
       return;
     }
@@ -375,6 +430,13 @@ export class World {
     }
 
     this.generateBaseWorld();
+    for (const entry of data.blocks) {
+      const { x, y, z, typeId } = entry;
+      if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') {
+        continue;
+      }
+      this.#setBlockInternal(x, y, z, typeId ?? DEFAULT_BLOCK_ID);
+    }
     this.update();
   }
 }

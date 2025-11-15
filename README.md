@@ -11,11 +11,8 @@ A simple Minecraft-like voxel world implemented in pure JavaScript and WebGL (Th
 - [x] Break and place blocks（左键破坏 / 右键放置）
 - [x] Multiple block types（草方块、泥土、石头）
 - [x] Simple save / load with localStorage（自动保存 + Shift+R 手动保存）
-- [x] Delta saves that only persist modified blocks for faster, smaller storage writes
-- [x] Chunk-based world rendering with instanced meshes for better performance
-- [x] Hidden-block culling to avoid drawing fully enclosed cubes
+- [x] Chunk-based world rendering
 - [x] Basic lighting and skybox
-- [x] Multilingual UI（简体中文 / 繁體中文 / English US / English UK）
 
 ## Tech Stack
 
