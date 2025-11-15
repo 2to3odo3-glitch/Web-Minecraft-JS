@@ -1,21 +1,53 @@
+import { DEFAULT_LANGUAGE } from './i18n.js';
+
 export const BLOCK_TYPES = [
   {
     id: 'grass',
-    label: '草方块',
     color: 0x4caf50,
-    description: '绿色的草地表层',
+    labels: {
+      'zh-CN': '草方块',
+      'zh-TW': '草方塊',
+      'en-US': 'Grass Block',
+      'en-GB': 'Grass Block',
+    },
+    descriptions: {
+      'zh-CN': '绿色的草地表层',
+      'zh-TW': '綠色的草地方塊',
+      'en-US': 'Lush surface grass',
+      'en-GB': 'Lush surface grass',
+    },
   },
   {
     id: 'dirt',
-    label: '泥土',
     color: 0x8d6e63,
-    description: '草地下的泥土层',
+    labels: {
+      'zh-CN': '泥土',
+      'zh-TW': '泥土',
+      'en-US': 'Dirt',
+      'en-GB': 'Soil',
+    },
+    descriptions: {
+      'zh-CN': '草地下的泥土层',
+      'zh-TW': '草地下的泥土層',
+      'en-US': 'Soil beneath the grass',
+      'en-GB': 'Soil beneath the grass',
+    },
   },
   {
     id: 'stone',
-    label: '石头',
     color: 0x9e9e9e,
-    description: '坚硬的石头方块',
+    labels: {
+      'zh-CN': '石头',
+      'zh-TW': '石頭',
+      'en-US': 'Stone',
+      'en-GB': 'Stone',
+    },
+    descriptions: {
+      'zh-CN': '坚硬的石头方块',
+      'zh-TW': '堅硬的石頭方塊',
+      'en-US': 'Hard subterranean rock',
+      'en-GB': 'Hard subterranean rock',
+    },
   },
 ];
 
@@ -31,4 +63,16 @@ export function getBlockType(id) {
 
 export function getBlockColor(id) {
   return getBlockType(id).color;
+}
+
+export function getBlockLabel(id, locale = DEFAULT_LANGUAGE) {
+  const type = getBlockType(id);
+  return type.labels?.[locale] ?? type.labels?.[DEFAULT_LANGUAGE] ?? type.id;
+}
+
+export function getBlockDescription(id, locale = DEFAULT_LANGUAGE) {
+  const type = getBlockType(id);
+  return (
+    type.descriptions?.[locale] ?? type.descriptions?.[DEFAULT_LANGUAGE] ?? ''
+  );
 }
