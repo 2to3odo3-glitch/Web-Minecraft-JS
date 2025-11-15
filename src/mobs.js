@@ -1,4 +1,4 @@
-import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+import * as THREE from '../three/build/three.module.js';
 import { isBlockSolid } from './blocks.js';
 
 const MOB_MAX_COUNT = 10;

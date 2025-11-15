@@ -1,5 +1,5 @@
-import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
-import { ImprovedNoise } from 'https://unpkg.com/three@0.158.0/examples/jsm/math/ImprovedNoise.js?module';
+import * as THREE from '../three/build/three.module.js';
+import { ImprovedNoise } from '../three/examples/jsm/math/ImprovedNoise.js';
 import {
   DEFAULT_BLOCK_ID,
   getTextureDefinition,
