@@ -46,10 +46,13 @@
               <h2 id="optionsTitle"></h2>
               <p id="overlayIntro" class="help-subtitle"></p>
               <p id="helpMouse">鼠标：视角</p>
-              <p id="helpMovement">WASD：移动，空格：上升，Shift：下降</p>
-              <p id="helpBreak">左键：破坏方块</p>
+              <p id="helpMovement">WASD：移动，空格：跳跃</p>
+              <p id="helpSprint">Ctrl：冲刺，Shift（创造模式）：下降</p>
+              <p id="helpBreak">左键：破坏方块（生存需蓄力）</p>
               <p id="helpPlace">右键：放置方块</p>
-              <p id="helpSelect">数字键 1-3：选择方块类型</p>
+              <p id="helpTool">F 键：切换工具</p>
+              <p id="helpMode">V 键：切换生存/创造</p>
+              <p id="helpSelect">数字键 1-9：选择方块类型</p>
             </div>
           </div>
         </div>
@@ -70,6 +73,17 @@
     <div id="hud" class="hud hidden">
       <div class="crosshair"></div>
       <div id="blockSelector" class="block-selector"></div>
+      <div class="hud-top-left">
+        <div id="modeIndicator" class="hud-badge"></div>
+        <div id="toolIndicator" class="hud-badge"></div>
+        <div class="hud-hints">
+          <span id="hudHintTool" class="hud-hint"></span>
+          <span id="hudHintMode" class="hud-hint"></span>
+        </div>
+      </div>
+      <div id="breakProgress" class="break-progress hidden">
+        <div class="fill"></div>
+      </div>
       <div id="saveStatus" class="save-status"></div>
     </div>
 

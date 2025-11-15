@@ -385,6 +385,70 @@ body::after {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
+.hud-top-left {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+}
+
+.hud-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.hud-hint {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.break-progress {
+  position: absolute;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.break-progress.hidden {
+  opacity: 0;
+}
+
+.break-progress .fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #ffa726, #ff7043);
+  transition: width 0.05s linear;
+}
+
 .save-status {
   position: absolute;
   top: 32px;
