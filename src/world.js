@@ -30,6 +30,7 @@ export class World {
     this.scene = scene;
     this.chunks = new Map();
     this.dirtyChunks = new Set();
+    this.modifiedBlocks = new Map();
     this.materialCache = new Map();
     this.blockGeometry = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
@@ -46,6 +47,7 @@ export class World {
     }
     this.chunks.clear();
     this.dirtyChunks.clear();
+    this.modifiedBlocks.clear();
   }
 
   getMaterial(typeId) {
@@ -102,7 +104,8 @@ export class World {
     return this.#setBlockInternal(x, y, z, null);
   }
 
-  #setBlockInternal(x, y, z, typeId) {
+  #setBlockInternal(x, y, z, typeId, options = {}) {
+    const { trackModification = true } = options;
     if (y < 0 || y >= CHUNK_HEIGHT) return false;
     const { cx, cz, lx, lz } = this.worldToLocal(x, y, z);
     const chunk = this.ensureChunk(cx, cz);
@@ -112,8 +115,39 @@ export class World {
       return false;
     }
     chunk.blocks[idx] = typeId;
+    if (trackModification) {
+      this.#recordModification(x, y, z, typeId);
+    }
     this.markChunkDirty(chunk);
+    this.#markNeighborChunksDirty(x, y, z);
     return true;
+  }
+
+  #recordModification(x, y, z, typeId) {
+    const key = `${x},${y},${z}`;
+    const baseType = this.#getBaseBlockType(x, y, z);
+    if (typeId === baseType) {
+      this.modifiedBlocks.delete(key);
+      return;
+    }
+    if (typeId === undefined) {
+      this.modifiedBlocks.delete(key);
+      return;
+    }
+    this.modifiedBlocks.set(key, typeId ?? null);
+  }
+
+  #getBaseBlockType(x, y, z) {
+    if (y < 0 || y >= CHUNK_HEIGHT) return null;
+    const { cx, cz } = this.worldToChunk(x, z);
+    if (Math.abs(cx) > WORLD_RADIUS || Math.abs(cz) > WORLD_RADIUS) {
+      return null;
+    }
+    const height = this.#computeHeight(x, z);
+    if (y >= height) return null;
+    if (y === height - 1) return 'grass';
+    if (height - y <= 3) return 'dirt';
+    return 'stone';
   }
 
   markChunkDirty(chunk) {
@@ -145,12 +179,15 @@ export class World {
           const idx = chunk.index(lx, y, lz);
           const typeId = chunk.blocks[idx];
           if (!typeId) continue;
-          if (!positionsByType.has(typeId)) {
-            positionsByType.set(typeId, []);
-          }
           const worldX = chunk.cx * CHUNK_SIZE + lx;
           const worldY = y;
           const worldZ = chunk.cz * CHUNK_SIZE + lz;
+          if (this.#isBlockHidden(worldX, worldY, worldZ)) {
+            continue;
+          }
+          if (!positionsByType.has(typeId)) {
+            positionsByType.set(typeId, []);
+          }
           positionsByType.get(typeId).push({ x: worldX, y: worldY, z: worldZ, typeId });
         }
       }
@@ -187,6 +224,39 @@ export class World {
     }
   }
 
+  #isBlockHidden(x, y, z) {
+    const neighborOffsets = [
+      [1, 0, 0],
+      [-1, 0, 0],
+      [0, 1, 0],
+      [0, -1, 0],
+      [0, 0, 1],
+      [0, 0, -1],
+    ];
+    for (const [dx, dy, dz] of neighborOffsets) {
+      if (!this.getBlock(x + dx, y + dy, z + dz)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  #markNeighborChunksDirty(x, y, z) {
+    const neighborOffsets = [
+      [1, 0, 0],
+      [-1, 0, 0],
+      [0, 0, 1],
+      [0, 0, -1],
+    ];
+    for (const [dx, , dz] of neighborOffsets) {
+      const neighbor = this.worldToLocal(x + dx, y, z + dz);
+      const neighborChunk = this.chunks.get(chunkKey(neighbor.cx, neighbor.cz));
+      if (neighborChunk) {
+        this.markChunkDirty(neighborChunk);
+      }
+    }
+  }
+
   generateBaseWorld() {
     for (let cx = -WORLD_RADIUS; cx <= WORLD_RADIUS; cx += 1) {
       for (let cz = -WORLD_RADIUS; cz <= WORLD_RADIUS; cz += 1) {
@@ -205,7 +275,9 @@ export class World {
               } else {
                 typeId = 'stone';
               }
-              this.#setBlockInternal(worldX, y, worldZ, typeId);
+              this.#setBlockInternal(worldX, y, worldZ, typeId, {
+                trackModification: false,
+              });
             }
           }
         }
@@ -244,45 +316,65 @@ export class World {
   }
 
   serialize() {
-    const blocks = [];
-    for (const chunk of this.chunks.values()) {
-      for (let y = 0; y < CHUNK_HEIGHT; y += 1) {
-        for (let lz = 0; lz < CHUNK_SIZE; lz += 1) {
-          for (let lx = 0; lx < CHUNK_SIZE; lx += 1) {
-            const idx = chunk.index(lx, y, lz);
-            const typeId = chunk.blocks[idx];
-            if (!typeId) continue;
-            const worldX = chunk.cx * CHUNK_SIZE + lx;
-            const worldY = y;
-            const worldZ = chunk.cz * CHUNK_SIZE + lz;
-            blocks.push({ x: worldX, y: worldY, z: worldZ, typeId });
-          }
-        }
-      }
-    }
+    const modifiedBlocks = Array.from(this.modifiedBlocks.entries())
+      .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
+      .map(([key, value]) => {
+        const [x, y, z] = key.split(',').map((part) => Number.parseInt(part, 10));
+        return { x, y, z, typeId: value };
+      });
     return {
-      version: 1,
+      version: 2,
       chunkSize: CHUNK_SIZE,
       chunkHeight: CHUNK_HEIGHT,
-      blocks,
+      modifiedBlocks,
     };
   }
 
   load(data) {
     this.dispose();
-    if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
+    if (!data) {
       this.generateBaseWorld();
       this.update();
       return;
     }
 
-    for (const entry of data.blocks) {
-      const { x, y, z, typeId } = entry;
-      if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') {
-        continue;
+    if (Array.isArray(data.modifiedBlocks)) {
+      this.generateBaseWorld();
+      for (const entry of data.modifiedBlocks) {
+        const { x, y, z, typeId } = entry;
+        if (
+          typeof x !== 'number' ||
+          typeof y !== 'number' ||
+          typeof z !== 'number'
+        ) {
+          continue;
+        }
+        this.#setBlockInternal(x, y, z, typeId ?? null, { trackModification: true });
       }
-      this.#setBlockInternal(x, y, z, typeId ?? DEFAULT_BLOCK_ID);
+      this.update();
+      return;
     }
+
+    if (Array.isArray(data.blocks)) {
+      this.generateBaseWorld();
+      for (const entry of data.blocks) {
+        const { x, y, z, typeId } = entry;
+        if (
+          typeof x !== 'number' ||
+          typeof y !== 'number' ||
+          typeof z !== 'number'
+        ) {
+          continue;
+        }
+        this.#setBlockInternal(x, y, z, typeId ?? DEFAULT_BLOCK_ID, {
+          trackModification: true,
+        });
+      }
+      this.update();
+      return;
+    }
+
+    this.generateBaseWorld();
     this.update();
   }
 }
