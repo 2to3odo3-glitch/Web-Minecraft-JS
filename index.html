@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Minecraft JS</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="overlay" class="overlay">
+      <div class="overlay-content">
+        <div class="language-picker">
+          <label id="languageLabel" for="languageSelect"></label>
+          <select id="languageSelect"></select>
+        </div>
+
+        <div class="logo-wrapper">
+          <div class="minecraft-logo">
+            <span id="overlayTitle" class="logo-text">Minecraft</span>
+            <span id="splashText" class="splash-text">It's finished!</span>
+          </div>
+        </div>
+
+        <div class="menu-wrapper">
+          <div class="menu-column">
+            <button id="singleplayerButton" class="menu-button primary">
+              Singleplayer
+            </button>
+            <button id="playOnlineButton" class="menu-button">
+              Play Online
+            </button>
+            <button id="multiplayerButton" class="menu-button">
+              Multiplayer
+            </button>
+            <button id="optionsButton" class="menu-button">
+              Options...
+            </button>
+            <button id="quitButton" class="menu-button">
+              Quit Game
+            </button>
+            <div id="menuStatus" class="menu-status"></div>
+          </div>
+          <div class="side-column">
+            <div class="mojang-emblem" aria-hidden="true">
+              <span class="mojang-word mark">MOJANG</span>
+              <span class="mojang-word studios">STUDIOS</span>
+            </div>
+            <div id="helpPanel" class="help-panel">
+              <h2 id="optionsTitle"></h2>
+              <p id="overlayIntro" class="help-subtitle"></p>
+              <p id="helpMouse">鼠标：视角</p>
+              <p id="helpMovement">WASD：移动，空格：跳跃</p>
+              <p id="helpSprint">Ctrl：冲刺，Shift（创造模式）：下降</p>
+              <p id="helpBreak">左键：破坏方块（生存需蓄力）</p>
+              <p id="helpPlace">右键：放置方块</p>
+              <p id="helpTool">F 键：切换工具</p>
+              <p id="helpMode">V 键：切换生存/创造</p>
+              <p id="helpSelect">数字键 1-9：选择方块类型</p>
+              <p id="helpTouchMove" class="mobile-hint">触控左摇杆：移动</p>
+              <p id="helpTouchLook" class="mobile-hint">触控右侧：观察 / 交互</p>
+              <p id="helpTouchActions" class="mobile-hint">触控按钮：跳跃、破坏、放置</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="lanPanel" class="lan-panel hidden" role="region" aria-live="polite">
+          <div class="lan-column">
+            <h2 id="lanHostTitle">Host a LAN world</h2>
+            <p id="lanHostHint" class="lan-hint">
+              Share the offer below with players on the same network.
+            </p>
+            <button id="lanCreateOffer" class="menu-button slim">Create Offer</button>
+            <textarea
+              id="lanOfferOutput"
+              class="lan-text"
+              readonly
+              placeholder="Offer will appear here"
+            ></textarea>
+            <div class="lan-actions">
+              <button id="lanCopyOffer" class="menu-button slim" type="button">
+                Copy Offer
+              </button>
+              <button id="lanClearOffer" class="menu-button slim" type="button">
+                Reset
+              </button>
+            </div>
+            <label for="lanAnswerInput" id="lanAnswerLabel" class="lan-hint"></label>
+            <textarea
+              id="lanAnswerInput"
+              class="lan-text"
+              placeholder="Paste answer from your friend here"
+            ></textarea>
+            <button id="lanAcceptAnswer" class="menu-button slim" type="button">
+              Apply Answer
+            </button>
+          </div>
+          <div class="lan-column">
+            <h2 id="lanJoinTitle">Join a LAN host</h2>
+            <p id="lanJoinHint" class="lan-hint">
+              Paste the offer from the host to generate your answer.
+            </p>
+            <label for="lanJoinOfferInput" id="lanJoinOfferLabel" class="lan-hint"></label>
+            <textarea
+              id="lanJoinOfferInput"
+              class="lan-text"
+              placeholder="Paste host offer here"
+            ></textarea>
+            <button id="lanGenerateAnswer" class="menu-button slim" type="button">
+              Generate Answer
+            </button>
+            <textarea
+              id="lanJoinAnswerOutput"
+              class="lan-text"
+              readonly
+              placeholder="Give this answer back to the host"
+            ></textarea>
+            <div class="lan-actions">
+              <button id="lanCopyAnswer" class="menu-button slim" type="button">
+                Copy Answer
+              </button>
+              <button id="lanClearJoin" class="menu-button slim" type="button">
+                Reset
+              </button>
+            </div>
+          </div>
+          <div class="lan-column status">
+            <h2 id="lanStatusTitle">Connection status</h2>
+            <p id="lanStatus" class="lan-status-text"></p>
+            <ul id="lanPeers" class="lan-peers"></ul>
+            <div class="lan-actions">
+              <button id="lanDisconnect" class="menu-button slim" type="button">
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">
+            <span id="editionLabel">Collector's Edition</span>
+            <span id="shaderLabel">FOR Shaders</span>
+          </div>
+          <div class="footer-right">
+            <span id="versionLabel">Minecraft 1.8.8</span>
+            <span id="resourceLabel">Resources: Mojang AB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hud" class="hud hidden">
+      <div class="crosshair"></div>
+      <div id="blockSelector" class="block-selector"></div>
+      <div class="hud-top-left">
+        <div id="modeIndicator" class="hud-badge"></div>
+        <div id="toolIndicator" class="hud-badge"></div>
+        <div class="hud-hints">
+          <span id="hudHintTool" class="hud-hint"></span>
+          <span id="hudHintMode" class="hud-hint"></span>
+        </div>
+      </div>
+      <div id="breakProgress" class="break-progress hidden">
+        <div class="fill"></div>
+      </div>
+      <div id="saveStatus" class="save-status"></div>
+    </div>
+
+    <div id="mobileControls" class="mobile-controls hidden" aria-hidden="true">
+      <div class="joystick" id="movePad">
+        <div class="joystick-thumb" id="moveThumb"></div>
+      </div>
+      <div class="look-pad" id="lookPad"></div>
+      <div class="mobile-buttons">
+        <button id="jumpButton" class="mobile-button" type="button">Jump</button>
+        <button id="breakButton" class="mobile-button" type="button">Mine</button>
+        <button id="placeButton" class="mobile-button" type="button">Place</button>
+        <button id="toolButton" class="mobile-button" type="button">Tools</button>
+        <button id="modeButton" class="mobile-button" type="button">Mode</button>
+      </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
