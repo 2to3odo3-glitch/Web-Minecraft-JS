@@ -348,13 +348,39 @@ export class World {
     const baseColor = new THREE.Color(definition.color ?? 0xffffff);
     const noiseAmount = definition.noise ?? 0.1;
     const brightness = definition.brightness ?? 1;
+    const highlight = definition.highlight ?? 0.08;
+    const shadow = definition.shadow ?? 0.12;
     const saltHash = stringHash(`${typeId}:${salt}`) ^ this.seed;
     for (let y = 0; y < size; y += 1) {
       for (let x = 0; x < size; x += 1) {
-        const random = hashCoords(x + saltHash, y + saltHash, saltHash, this.seed) - 0.5;
-        const variation = 1 + random * noiseAmount;
-        const final = baseColor.clone();
-        final.multiplyScalar(brightness * variation);
+        const coarse = hashCoords(
+          x + saltHash,
+          y + saltHash,
+          saltHash,
+          this.seed
+        ) - 0.5;
+        const fine = hashCoords(
+          x * 7 + saltHash,
+          y * 13 + saltHash,
+          saltHash * 3,
+          this.seed
+        ) - 0.5;
+        let shade = brightness;
+        shade *= 1 + coarse * noiseAmount;
+        shade *= 1 + fine * noiseAmount * 0.45;
+
+        const verticalGradient = 1 - (y / (size - 1)) * shadow;
+        shade *= verticalGradient;
+
+        const edgeDistance = Math.min(x, size - 1 - x, y, size - 1 - y) / (size / 2);
+        const edgeInfluence = THREE.MathUtils.lerp(0.82, 1, edgeDistance);
+        shade *= edgeInfluence;
+
+        if (y <= 2) {
+          shade *= 1 + highlight;
+        }
+
+        const final = baseColor.clone().multiplyScalar(shade);
         const idx = (y * size + x) * 3;
         data[idx] = Math.floor(THREE.MathUtils.clamp(final.r, 0, 1) * 255);
         data[idx + 1] = Math.floor(THREE.MathUtils.clamp(final.g, 0, 1) * 255);

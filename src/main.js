@@ -17,6 +17,8 @@ import {
 } from './i18n.js';
 import { loadWorld, saveWorld } from './storage.js';
 import { MobManager } from './mobs.js';
+import { MobileControls } from './mobile.js';
+import { LanMultiplayer } from './multiplayer.js';
 
 const PLAYER_WIDTH = 0.6;
 const PLAYER_HEIGHT = 1.8;
@@ -26,6 +28,14 @@ const CREATIVE_FLY_SPEED = 10;
 const CREATIVE_FAST_MULTIPLIER = 1.6;
 const GRAVITY = 32;
 const PLAY_ONLINE_URL = 'https://2to3odo3-glitch.github.io/Web-Minecraft-JS/';
+const isMobileDevice =
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ));
+const MOBILE_LOOK_SENSITIVITY = 0.003;
+const signalDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder() : null;
 
 const TOOLS = [
   { id: 'hand', type: null, speed: 0.8, efficiency: 1.1, labelKey: 'toolHand' },
@@ -35,8 +45,10 @@ const TOOLS = [
   { id: 'shears', type: 'shears', speed: 1.2, efficiency: 3.1, labelKey: 'toolShears' },
 ];
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio ?? 1, isMobileDevice ? 1.75 : 2.5)
+);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
@@ -77,6 +89,29 @@ world.update();
 
 const mobManager = new MobManager(scene, world);
 
+lanMultiplayer = new LanMultiplayer({
+  world,
+  getPlayerPose: () => getPlayerPoseSnapshot(),
+  getMode: () => playerState.mode,
+  getWorldSnapshot: () => getWorldSnapshotData(),
+  applyWorldSnapshot: applyWorldSnapshotFromHost,
+  onStatus: (key, replacements) => {
+    updateLanStatus(key ?? 'lanStatusIdle', replacements ?? {});
+  },
+  onPeerList: (peers) => {
+    currentPeerList = Array.isArray(peers) ? peers.slice() : [];
+    if (!currentPeerList.some((peer) => peer.id === lanMultiplayer.id)) {
+      currentPeerList.unshift({ id: lanMultiplayer.id, mode: playerState.mode });
+    }
+    updatePeerListDisplay(currentPeerList);
+  },
+  onRemoteState: handleRemoteState,
+  onRemoteMode: handleRemoteMode,
+  onRemoteBlock: handleRemoteBlock,
+});
+currentPeerList = [{ id: lanMultiplayer.id, mode: playerState.mode }];
+updatePeerListDisplay(currentPeerList);
+
 const overlayEl = document.getElementById('overlay');
 const overlayTitleEl = document.getElementById('overlayTitle');
 const splashTextEl = document.getElementById('splashText');
@@ -101,6 +136,9 @@ const helpPlaceEl = document.getElementById('helpPlace');
 const helpToolEl = document.getElementById('helpTool');
 const helpModeEl = document.getElementById('helpMode');
 const helpSelectEl = document.getElementById('helpSelect');
+const helpTouchMoveEl = document.getElementById('helpTouchMove');
+const helpTouchLookEl = document.getElementById('helpTouchLook');
+const helpTouchActionsEl = document.getElementById('helpTouchActions');
 const languageLabelEl = document.getElementById('languageLabel');
 const languageSelectEl = document.getElementById('languageSelect');
 const hudEl = document.getElementById('hud');
@@ -112,6 +150,37 @@ const hudHintToolEl = document.getElementById('hudHintTool');
 const hudHintModeEl = document.getElementById('hudHintMode');
 const breakProgressEl = document.getElementById('breakProgress');
 const breakProgressFillEl = breakProgressEl?.querySelector('.fill');
+const lanPanelEl = document.getElementById('lanPanel');
+const lanHostTitleEl = document.getElementById('lanHostTitle');
+const lanHostHintEl = document.getElementById('lanHostHint');
+const lanCreateOfferButton = document.getElementById('lanCreateOffer');
+const lanOfferOutput = document.getElementById('lanOfferOutput');
+const lanCopyOfferButton = document.getElementById('lanCopyOffer');
+const lanClearOfferButton = document.getElementById('lanClearOffer');
+const lanAnswerLabelEl = document.getElementById('lanAnswerLabel');
+const lanAnswerInput = document.getElementById('lanAnswerInput');
+const lanAcceptAnswerButton = document.getElementById('lanAcceptAnswer');
+const lanJoinTitleEl = document.getElementById('lanJoinTitle');
+const lanJoinHintEl = document.getElementById('lanJoinHint');
+const lanJoinOfferLabelEl = document.getElementById('lanJoinOfferLabel');
+const lanJoinOfferInput = document.getElementById('lanJoinOfferInput');
+const lanGenerateAnswerButton = document.getElementById('lanGenerateAnswer');
+const lanJoinAnswerOutput = document.getElementById('lanJoinAnswerOutput');
+const lanCopyAnswerButton = document.getElementById('lanCopyAnswer');
+const lanClearJoinButton = document.getElementById('lanClearJoin');
+const lanStatusTitleEl = document.getElementById('lanStatusTitle');
+const lanStatusTextEl = document.getElementById('lanStatus');
+const lanPeersListEl = document.getElementById('lanPeers');
+const lanDisconnectButton = document.getElementById('lanDisconnect');
+const mobileControlsRoot = document.getElementById('mobileControls');
+const movePadEl = document.getElementById('movePad');
+const moveThumbEl = document.getElementById('moveThumb');
+const lookPadEl = document.getElementById('lookPad');
+const jumpButtonEl = document.getElementById('jumpButton');
+const breakButtonEl = document.getElementById('breakButton');
+const placeButtonEl = document.getElementById('placeButton');
+const toolButtonEl = document.getElementById('toolButton');
+const modeButtonEl = document.getElementById('modeButton');
 
 function readStoredLanguage() {
   try {
@@ -188,6 +257,15 @@ function setMenuStatus(message, metadata = null) {
   refreshMenuStatus();
 }
 
+function updateLanStatus(key, replacements = {}) {
+  lastLanStatusKey = key;
+  lastLanStatusReplacements = replacements;
+  if (lanStatusTextEl) {
+    lanStatusTextEl.textContent = translate(key, replacements);
+  }
+  setMenuStatus('', { key, replacements });
+}
+
 function persistWorld() {
   const result = saveWorld(world.serialize());
   if (result) {
@@ -203,6 +281,10 @@ function persistWorld() {
   }
 }
 
+function isGameplayActive() {
+  return controls.isLocked || mobileGameplayActive;
+}
+
 let currentBlockType = BLOCK_TYPES[0].id;
 const blockOptionElements = new Map();
 let currentToolIndex = 0;
@@ -213,9 +295,205 @@ const playerState = {
   onGround: false,
   breaking: null,
 };
+let mobileControls = null;
+const mobileMoveVector = { x: 0, y: 0 };
+let mobileJumpQueued = false;
+let mobileGameplayActive = false;
+let lanPanelVisible = false;
+let lanMultiplayer = null;
+const remotePlayers = new Map();
+const remoteMaterialCache = new Map();
+const remotePlayerGeometry = new THREE.BoxGeometry(
+  PLAYER_WIDTH,
+  PLAYER_HEIGHT,
+  PLAYER_WIDTH
+);
+let currentPeerList = [];
+let lastHostOfferId = null;
+let lastClientOfferId = null;
+let lastLanStatusKey = 'lanStatusIdle';
+let lastLanStatusReplacements = {};
 
 function colorToStyle(color) {
   return new THREE.Color(color).getStyle();
+}
+
+function getRemoteMaterial(mode = 'survival') {
+  const key = mode === 'creative' ? 'creative' : 'survival';
+  if (remoteMaterialCache.has(key)) {
+    return remoteMaterialCache.get(key);
+  }
+  const color = key === 'creative' ? 0xffca28 : 0x64b5f6;
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.8,
+    metalness: 0.1,
+    emissive: key === 'creative' ? new THREE.Color(0x553300) : new THREE.Color(0x10334d),
+    emissiveIntensity: 0.2,
+  });
+  remoteMaterialCache.set(key, material);
+  return material;
+}
+
+function ensureRemotePlayer(id, mode = 'survival') {
+  if (!id) return null;
+  let entry = remotePlayers.get(id);
+  if (!entry) {
+    const mesh = new THREE.Mesh(remotePlayerGeometry, getRemoteMaterial(mode));
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.visible = true;
+    scene.add(mesh);
+    entry = { mesh, mode };
+    remotePlayers.set(id, entry);
+  }
+  const targetMaterial = getRemoteMaterial(mode);
+  if (entry.mode !== mode) {
+    entry.mode = mode;
+    entry.mesh.material = targetMaterial;
+  }
+  return entry;
+}
+
+function removeRemotePlayer(id) {
+  const entry = remotePlayers.get(id);
+  if (!entry) return;
+  scene.remove(entry.mesh);
+  remotePlayers.delete(id);
+}
+
+function clearRemotePlayers() {
+  for (const id of [...remotePlayers.keys()]) {
+    removeRemotePlayer(id);
+  }
+}
+
+function updatePeerListDisplay(peers = []) {
+  if (!lanPeersListEl) return;
+  lanPeersListEl.innerHTML = '';
+  const knownIds = new Set();
+  peers.forEach((peer, index) => {
+    if (!peer || !peer.id) return;
+    const item = document.createElement('li');
+    const modeKey = peer.mode === 'creative' ? 'modeCreative' : 'modeSurvival';
+    const labelKey = peer.id === lanMultiplayer?.id ? 'lanPeerSelf' : 'lanPeerOther';
+    item.textContent = translate(labelKey, {
+      index: index + 1,
+      mode: translate(modeKey),
+    });
+    lanPeersListEl.appendChild(item);
+    knownIds.add(peer.id);
+  });
+  for (const id of [...remotePlayers.keys()]) {
+    if (id === lanMultiplayer?.id) continue;
+    if (!knownIds.has(id)) {
+      removeRemotePlayer(id);
+    }
+  }
+}
+
+function handleRemoteState(message) {
+  const { id, p, yaw, pitch, mode } = message;
+  if (!id || !Array.isArray(p) || p.length < 3) return;
+  const entry = ensureRemotePlayer(id, mode);
+  if (!entry) return;
+  entry.mesh.position.set(
+    p[0],
+    p[1] - PLAYER_EYE_HEIGHT + PLAYER_HEIGHT / 2,
+    p[2]
+  );
+  entry.mesh.rotation.y = yaw ?? entry.mesh.rotation.y;
+  const pitchObject = entry.mesh.children?.[0];
+  if (pitchObject && typeof pitch === 'number') {
+    pitchObject.rotation.x = pitch;
+  }
+  if (!currentPeerList.some((peer) => peer.id === id)) {
+    currentPeerList.push({ id, mode: mode ?? 'survival' });
+    updatePeerListDisplay(currentPeerList);
+  }
+}
+
+function handleRemoteMode(message) {
+  const { id, mode } = message;
+  if (!id) return;
+  ensureRemotePlayer(id, mode);
+  const index = currentPeerList.findIndex((peer) => peer.id === id);
+  if (index >= 0) {
+    currentPeerList[index] = { ...currentPeerList[index], mode };
+  } else {
+    currentPeerList.push({ id, mode });
+  }
+  updatePeerListDisplay(currentPeerList);
+}
+
+function handleRemoteBlock(message) {
+  const { action, x, y, z, typeId } = message;
+  if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') {
+    return;
+  }
+  let changed = false;
+  if (action === 'set') {
+    changed = world.setBlock(x, y, z, typeId);
+  } else if (action === 'remove') {
+    changed = world.removeBlock(x, y, z);
+  }
+  if (changed) {
+    world.update();
+    if (lanMultiplayer?.role === 'host') {
+      persistWorld();
+    }
+  }
+}
+
+function getPlayerPoseSnapshot() {
+  const position = controls.getObject().position.clone();
+  const velocity = playerState.velocity.clone();
+  const yaw = controls.getObject().rotation.y;
+  const pitchObject = getPitchObject();
+  const pitch = pitchObject ? pitchObject.rotation.x : camera.rotation.x;
+  return { position, velocity, yaw, pitch };
+}
+
+function getWorldSnapshotData() {
+  return {
+    data: world.serialize(),
+    seed: world.seed,
+  };
+}
+
+function applyWorldSnapshotFromHost(snapshot) {
+  if (!snapshot) return;
+  if (typeof snapshot.seed === 'number') {
+    world.setSeed(snapshot.seed);
+  }
+  if (snapshot.data) {
+    world.load(snapshot.data);
+  }
+  if (Array.isArray(snapshot.peers)) {
+    currentPeerList = snapshot.peers;
+    updatePeerListDisplay(currentPeerList);
+  }
+  world.update();
+}
+
+function decodeLanSignal(text) {
+  try {
+    const normalized = text?.trim();
+    if (!normalized) return null;
+    const binary = window.atob(normalized);
+    if (signalDecoder) {
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const decoded = signalDecoder.decode(bytes);
+      return JSON.parse(decoded);
+    }
+    const decoded = decodeURIComponent(escape(binary));
+    return JSON.parse(decoded);
+  } catch (error) {
+    return null;
+  }
 }
 
 function rebuildBlockSelector() {
@@ -315,11 +593,63 @@ function applyTranslations() {
       maxBlock: BLOCK_TYPES.length,
       zeroHint: BLOCK_TYPES.length >= 10 ? translate('helpSelectZero') : '',
     });
+  if (helpTouchMoveEl) helpTouchMoveEl.textContent = translate('helpTouchMove');
+  if (helpTouchLookEl) helpTouchLookEl.textContent = translate('helpTouchLook');
+  if (helpTouchActionsEl)
+    helpTouchActionsEl.textContent = translate('helpTouchActions');
   if (editionLabelEl) editionLabelEl.textContent = translate('editionLabel');
   if (shaderLabelEl) shaderLabelEl.textContent = translate('shaderLabel');
   if (versionLabelEl) versionLabelEl.textContent = translate('versionLabel');
   if (resourceLabelEl) resourceLabelEl.textContent = translate('resourceLabel');
   if (languageLabelEl) languageLabelEl.textContent = translate('languageLabel');
+  if (lanHostTitleEl) lanHostTitleEl.textContent = translate('lanHostTitle');
+  if (lanHostHintEl) lanHostHintEl.textContent = translate('lanHostHint');
+  if (lanCreateOfferButton)
+    lanCreateOfferButton.textContent = translate('lanCreateOffer');
+  if (lanOfferOutput)
+    lanOfferOutput.setAttribute('placeholder', translate('lanOfferPlaceholder'));
+  if (lanCopyOfferButton)
+    lanCopyOfferButton.textContent = translate('lanCopyOffer');
+  if (lanClearOfferButton)
+    lanClearOfferButton.textContent = translate('lanClearOffer');
+  if (lanAnswerLabelEl) lanAnswerLabelEl.textContent = translate('lanAnswerLabel');
+  if (lanAnswerInput)
+    lanAnswerInput.setAttribute('placeholder', translate('lanAnswerPlaceholder'));
+  if (lanAcceptAnswerButton)
+    lanAcceptAnswerButton.textContent = translate('lanAcceptAnswer');
+  if (lanJoinTitleEl) lanJoinTitleEl.textContent = translate('lanJoinTitle');
+  if (lanJoinHintEl) lanJoinHintEl.textContent = translate('lanJoinHint');
+  if (lanJoinOfferLabelEl)
+    lanJoinOfferLabelEl.textContent = translate('lanJoinOfferLabel');
+  if (lanJoinOfferInput)
+    lanJoinOfferInput.setAttribute(
+      'placeholder',
+      translate('lanJoinOfferPlaceholder')
+    );
+  if (lanGenerateAnswerButton)
+    lanGenerateAnswerButton.textContent = translate('lanGenerateAnswer');
+  if (lanJoinAnswerOutput)
+    lanJoinAnswerOutput.setAttribute(
+      'placeholder',
+      translate('lanJoinAnswerPlaceholder')
+    );
+  if (lanCopyAnswerButton)
+    lanCopyAnswerButton.textContent = translate('lanCopyAnswer');
+  if (lanClearJoinButton)
+    lanClearJoinButton.textContent = translate('lanClearJoin');
+  if (lanDisconnectButton)
+    lanDisconnectButton.textContent = translate('lanDisconnect');
+  if (lanStatusTitleEl) lanStatusTitleEl.textContent = translate('lanStatusTitle');
+  if (lanStatusTextEl)
+    lanStatusTextEl.textContent = translate(
+      lastLanStatusKey,
+      lastLanStatusReplacements
+    );
+  if (jumpButtonEl) jumpButtonEl.textContent = translate('mobileJump');
+  if (breakButtonEl) breakButtonEl.textContent = translate('mobileBreak');
+  if (placeButtonEl) placeButtonEl.textContent = translate('mobilePlace');
+  if (toolButtonEl) toolButtonEl.textContent = translate('mobileTool');
+  if (modeButtonEl) modeButtonEl.textContent = translate('mobileMode');
   if (optionsButton && helpPanelEl)
     optionsButton.setAttribute(
       'aria-expanded',
@@ -329,6 +659,7 @@ function applyTranslations() {
   updateModeIndicator();
   updateToolIndicator();
   updateHudHints();
+  updatePeerListDisplay(currentPeerList);
 }
 
 languageSelectEl?.addEventListener('change', (event) => {
@@ -382,7 +713,7 @@ function handleKeyChange(event, isDown) {
     }
   }
 
-  if (isDown && controls.isLocked) {
+  if (isDown && isGameplayActive()) {
     if (event.code === 'KeyF') {
       cycleTool(1);
     }
@@ -403,9 +734,34 @@ document.addEventListener('keyup', (event) => {
   handleKeyChange(event, false);
 });
 
+function enterGameplay() {
+  if (overlayEl) overlayEl.classList.add('hidden');
+  if (hudEl) hudEl.classList.remove('hidden');
+  if (isMobileDevice && mobileControls) {
+    mobileControls.enable();
+    mobileGameplayActive = true;
+  }
+}
+
+function exitGameplay() {
+  if (overlayEl) overlayEl.classList.remove('hidden');
+  if (hudEl) hudEl.classList.add('hidden');
+  if (mobileControls) {
+    mobileControls.disable();
+  }
+  mobileGameplayActive = false;
+  mobileMoveVector.x = 0;
+  mobileMoveVector.y = 0;
+  cancelBreakBlock();
+}
+
 singleplayerButton?.addEventListener('click', () => {
   setMenuStatus('', null);
-  controls.lock();
+  if (isMobileDevice) {
+    enterGameplay();
+  } else {
+    controls.lock();
+  }
 });
 
 playOnlineButton?.addEventListener('click', () => {
@@ -420,10 +776,134 @@ playOnlineButton?.addEventListener('click', () => {
 });
 
 multiplayerButton?.addEventListener('click', () => {
-  setMenuStatus(translate('multiplayerUnavailable'), {
-    key: 'multiplayerUnavailable',
-    replacements: {},
-  });
+  lanPanelVisible = !lanPanelVisible;
+  if (lanPanelEl) {
+    lanPanelEl.classList.toggle('hidden', !lanPanelVisible);
+    if (lanPanelVisible) {
+      lanPanelEl.scrollTop = 0;
+      updateLanStatus('lanStatusIdle');
+    }
+  }
+  const key = lanPanelVisible ? 'lanPanelOpened' : 'lanPanelClosed';
+  setMenuStatus('', { key, replacements: {} });
+});
+
+lanCreateOfferButton?.addEventListener('click', async () => {
+  try {
+    const offer = await lanMultiplayer.createOffer();
+    lanOfferOutput.value = offer;
+    const parsed = decodeLanSignal(offer);
+    lastHostOfferId = parsed?.offerId ?? null;
+    updateLanStatus('lanStatusOfferReady');
+  } catch (error) {
+    console.error('[LAN] Failed to create offer', error);
+    updateLanStatus('lanStatusInvalidSignal');
+  }
+});
+
+lanCopyOfferButton?.addEventListener('click', async () => {
+  if (!lanOfferOutput?.value) return;
+  try {
+    await navigator.clipboard?.writeText(lanOfferOutput.value);
+    updateLanStatus('lanStatusCopyOk');
+  } catch (error) {
+    console.warn('[LAN] Clipboard copy failed', error);
+    updateLanStatus('lanStatusCopyFail');
+  }
+});
+
+lanClearOfferButton?.addEventListener('click', () => {
+  lanOfferOutput.value = '';
+  lanAnswerInput.value = '';
+  lastHostOfferId = null;
+  lanMultiplayer.cancelPendingOffers();
+  if (!lanMultiplayer.isActive()) {
+    clearRemotePlayers();
+  }
+});
+
+lanAcceptAnswerButton?.addEventListener('click', async () => {
+  const answer = lanAnswerInput.value.trim();
+  const parsed = decodeLanSignal(answer);
+  const offerId = parsed?.offerId ?? lastHostOfferId;
+  if (!offerId) {
+    updateLanStatus('lanStatusInvalidSignal');
+    return;
+  }
+  try {
+    await lanMultiplayer.acceptAnswer(offerId, answer);
+    updateLanStatus('lanStatusConnecting');
+  } catch (error) {
+    console.error('[LAN] Failed to accept answer', error);
+    updateLanStatus('lanStatusInvalidSignal');
+  }
+});
+
+lanGenerateAnswerButton?.addEventListener('click', async () => {
+  const offer = lanJoinOfferInput.value.trim();
+  if (!offer) {
+    updateLanStatus('lanStatusInvalidSignal');
+    return;
+  }
+  try {
+    lanMultiplayer.disconnect();
+    clearRemotePlayers();
+    const answer = await lanMultiplayer.createAnswer(offer);
+    lanJoinAnswerOutput.value = answer;
+    const parsed = decodeLanSignal(answer);
+    lastClientOfferId = parsed?.offerId ?? null;
+    updateLanStatus('lanStatusAnswerReady');
+  } catch (error) {
+    console.error('[LAN] Failed to generate answer', error);
+    updateLanStatus('lanStatusInvalidSignal');
+  }
+});
+
+lanCopyAnswerButton?.addEventListener('click', async () => {
+  if (!lanJoinAnswerOutput?.value) return;
+  try {
+    await navigator.clipboard?.writeText(lanJoinAnswerOutput.value);
+    updateLanStatus('lanStatusCopyOk');
+  } catch (error) {
+    console.warn('[LAN] Clipboard copy failed', error);
+    updateLanStatus('lanStatusCopyFail');
+  }
+});
+
+lanClearJoinButton?.addEventListener('click', () => {
+  lanJoinOfferInput.value = '';
+  lanJoinAnswerOutput.value = '';
+  lastClientOfferId = null;
+  const removed = lanMultiplayer.cancelPendingOffers();
+  if (!lanMultiplayer.isActive()) {
+    clearRemotePlayers();
+    if (removed === 0) {
+      updateLanStatus('lanStatusIdle');
+    }
+  }
+});
+
+lanDisconnectButton?.addEventListener('click', () => {
+  lanMultiplayer.disconnect();
+  clearRemotePlayers();
+});
+
+lanAnswerInput?.addEventListener('input', () => {
+  if (lanAnswerInput.value.trim().length > 0) {
+    updateLanStatus('lanStatusAwaitAnswer');
+  } else if (lanOfferOutput.value.trim().length > 0) {
+    updateLanStatus('lanStatusOfferReady');
+  } else {
+    updateLanStatus('lanStatusIdle');
+  }
+});
+
+lanJoinOfferInput?.addEventListener('input', () => {
+  if (lanJoinOfferInput.value.trim().length > 0) {
+    updateLanStatus('lanStatusConnecting');
+  } else {
+    updateLanStatus('lanStatusIdle');
+  }
 });
 
 optionsButton?.addEventListener('click', () => {
@@ -442,19 +922,88 @@ quitButton?.addEventListener('click', () => {
 });
 
 controls.addEventListener('lock', () => {
-  overlayEl?.classList.add('hidden');
-  if (hudEl) {
-    hudEl.classList.remove('hidden');
-  }
+  enterGameplay();
 });
 
 controls.addEventListener('unlock', () => {
-  overlayEl?.classList.remove('hidden');
-  if (hudEl) {
-    hudEl.classList.add('hidden');
-  }
-  cancelBreakBlock();
+  exitGameplay();
 });
+
+if (isMobileDevice) {
+  mobileControls = new MobileControls({
+    root: mobileControlsRoot,
+    movePad: movePadEl,
+    moveThumb: moveThumbEl,
+    lookPad: lookPadEl,
+    buttons: {
+      jumpButton: jumpButtonEl,
+      breakButton: breakButtonEl,
+      placeButton: placeButtonEl,
+      toolButton: toolButtonEl,
+      modeButton: modeButtonEl,
+    },
+    onMove: (vector) => {
+      mobileMoveVector.x = THREE.MathUtils.clamp(vector.x, -1, 1);
+      mobileMoveVector.y = THREE.MathUtils.clamp(vector.y, -1, 1);
+    },
+    onLook: ({ deltaX, deltaY }) => {
+      if (!isGameplayActive()) return;
+      applyLookDelta(deltaX, deltaY);
+    },
+    onJump: () => {
+      if (!isGameplayActive()) {
+        enterGameplay();
+      }
+      mobileJumpQueued = true;
+    },
+    onBreakStart: () => {
+      if (!isGameplayActive()) {
+        enterGameplay();
+      }
+      beginBreakBlock();
+    },
+    onBreakEnd: () => {
+      cancelBreakBlock();
+    },
+    onPlace: () => {
+      if (!isGameplayActive()) {
+        enterGameplay();
+      }
+      tryPlaceBlock();
+    },
+    onToggleTool: () => {
+      if (!isGameplayActive()) {
+        enterGameplay();
+      }
+      cycleTool(1);
+    },
+    onToggleMode: () => {
+      if (!isGameplayActive()) {
+        enterGameplay();
+      }
+      toggleGameMode();
+    },
+  });
+}
+
+renderer.domElement.addEventListener(
+  'touchstart',
+  (event) => {
+    if (isGameplayActive()) {
+      event.preventDefault();
+    }
+  },
+  { passive: false }
+);
+renderer.domElement.addEventListener(
+  'touchmove',
+  (event) => {
+    if (isGameplayActive()) {
+      event.preventDefault();
+    }
+  },
+  { passive: false }
+);
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -466,9 +1015,39 @@ const raycaster = new THREE.Raycaster();
 raycaster.far = MAX_INTERACT_DISTANCE + 2;
 const pointer = new THREE.Vector2(0, 0);
 
+function getPitchObject() {
+  const yawObject = controls.getObject();
+  if (yawObject.children && yawObject.children.length > 0) {
+    return yawObject.children[0];
+  }
+  return null;
+}
+
+function applyLookDelta(deltaX, deltaY) {
+  const yawObject = controls.getObject();
+  yawObject.rotation.y -= deltaX * MOBILE_LOOK_SENSITIVITY;
+  const pitchObject = getPitchObject();
+  const limit = Math.PI / 2 - 0.01;
+  if (pitchObject) {
+    const next = THREE.MathUtils.clamp(
+      pitchObject.rotation.x - deltaY * MOBILE_LOOK_SENSITIVITY,
+      -limit,
+      limit
+    );
+    pitchObject.rotation.x = next;
+  } else {
+    const next = THREE.MathUtils.clamp(
+      camera.rotation.x - deltaY * MOBILE_LOOK_SENSITIVITY,
+      -limit,
+      limit
+    );
+    camera.rotation.x = next;
+  }
+}
+
 renderer.domElement.addEventListener('contextmenu', (event) => event.preventDefault());
 renderer.domElement.addEventListener('mousedown', (event) => {
-  if (!controls.isLocked) return;
+  if (!isGameplayActive()) return;
   if (event.button === 0) {
     beginBreakBlock();
   } else if (event.button === 2) {
@@ -553,6 +1132,12 @@ function beginBreakBlock() {
     if (changed) {
       world.update();
       persistWorld();
+      lanMultiplayer?.notifyBlockChange({
+        action: 'remove',
+        x: block.x,
+        y: block.y,
+        z: block.z,
+      });
     }
     return;
   }
@@ -590,6 +1175,12 @@ function finishBreakingBlock(block) {
   if (removed) {
     world.update();
     persistWorld();
+    lanMultiplayer?.notifyBlockChange({
+      action: 'remove',
+      x: block.x,
+      y: block.y,
+      z: block.z,
+    });
   }
   cancelBreakBlock();
 }
@@ -619,6 +1210,13 @@ function tryPlaceBlock() {
   if (placed) {
     world.update();
     persistWorld();
+    lanMultiplayer?.notifyBlockChange({
+      action: 'set',
+      x: targetX,
+      y: targetY,
+      z: targetZ,
+      typeId: currentBlockType,
+    });
   }
 }
 
@@ -640,7 +1238,7 @@ function getToolSpeed(tool, blockType) {
 
 function updateBreakProgress(delta) {
   if (!playerState.breaking) return;
-  if (!controls.isLocked) {
+  if (!isGameplayActive()) {
     cancelBreakBlock();
     return;
   }
@@ -680,6 +1278,7 @@ function cycleTool(direction) {
 function setGameMode(mode) {
   if (playerState.mode === mode) return;
   playerState.mode = mode;
+  lanMultiplayer?.notifyModeChange(playerState.mode);
   if (mode === 'creative') {
     playerState.velocity.set(0, 0, 0);
     playerState.onGround = false;
@@ -790,7 +1389,7 @@ const sideVector = new THREE.Vector3();
 const movementDirection = new THREE.Vector3();
 
 function updateMovement(delta) {
-  if (!controls.isLocked) return;
+  if (!isGameplayActive()) return;
   const player = controls.getObject();
   const sprinting = keys.ControlLeft || keys.ControlRight;
 
@@ -805,6 +1404,15 @@ function updateMovement(delta) {
   if (keys.KeyS) movementDirection.addScaledVector(forwardVector, -1);
   if (keys.KeyD) movementDirection.add(sideVector);
   if (keys.KeyA) movementDirection.addScaledVector(sideVector, -1);
+
+  if (mobileControls?.isActive) {
+    const magnitude = Math.hypot(mobileMoveVector.x, mobileMoveVector.y);
+    if (magnitude > 0.05) {
+      movementDirection.addScaledVector(forwardVector, -mobileMoveVector.y);
+      movementDirection.addScaledVector(sideVector, mobileMoveVector.x);
+    }
+  }
+
   if (movementDirection.lengthSq() > 0) {
     movementDirection.normalize();
   }
@@ -812,12 +1420,15 @@ function updateMovement(delta) {
   if (playerState.mode === 'creative') {
     const speed = sprinting ? CREATIVE_FLY_SPEED * CREATIVE_FAST_MULTIPLIER : CREATIVE_FLY_SPEED;
     player.position.addScaledVector(movementDirection, speed * delta);
-    const vertical = (keys.Space ? 1 : 0) - (keys.ShiftLeft || keys.ShiftRight ? 1 : 0);
+    const ascend = keys.Space || mobileJumpQueued ? 1 : 0;
+    const descend = keys.ShiftLeft || keys.ShiftRight ? 1 : 0;
+    const vertical = ascend - descend;
     if (vertical !== 0) {
       player.position.y += vertical * speed * 0.75 * delta;
     }
     playerState.velocity.set(0, 0, 0);
     playerState.onGround = false;
+    mobileJumpQueued = false;
     return;
   }
 
@@ -840,10 +1451,12 @@ function updateMovement(delta) {
     playerState.velocity.y = -GRAVITY * 2;
   }
 
-  if (playerState.onGround && keys.Space) {
+  const jumpRequested = keys.Space || mobileJumpQueued;
+  if (playerState.onGround && jumpRequested) {
     playerState.velocity.y = 10;
     playerState.onGround = false;
   }
+  mobileJumpQueued = false;
 
   const onGround = resolvePlayerCollisions(player.position, playerState.velocity, delta);
   playerState.onGround = onGround;
@@ -860,6 +1473,7 @@ function animate() {
   updateBreakProgress(delta);
   world.update();
   mobManager.update(delta, playerPosition);
+  lanMultiplayer.update(delta);
   renderer.render(scene, camera);
 }
 
@@ -869,3 +1483,11 @@ showSaveStatus(translate('welcome'), false, {
   key: 'welcome',
   replacements: {},
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./sw.js')
+      .catch((error) => console.warn('[SW] Service worker registration failed', error));
+  });
+}

@@ -16,6 +16,9 @@ A simple Minecraft-like voxel world implemented in pure JavaScript and WebGL (Th
 - [x] Instanced chunk meshing, hidden-face culling, and delta saves for performant rendering and compact persistence
 - [x] LocalStorage save / load（自动保存 + Shift+R 手动保存）
 - [x] Multilingual UI（简体中文 / 繁體中文 / English US / English UK）
+- [x] Responsive mobile HUD with virtual joysticks / buttons（移动端摇杆 + 触控提示）
+- [x] LAN multiplayer via peer-to-peer WebRTC signalling（局域网复制粘贴信令即可联机）
+- [x] Offline-ready caching through a lightweight service worker（服务工作线程缓存 GitHub 资源）
 
 ## Tech Stack
 
@@ -48,3 +51,4 @@ python3 -m http.server 3000
 - `V`：切换生存 / 创造模式
 - 数字键 `1-9`（`0` 代表第 10 格）：切换方块类型
 - `Shift + R`：手动保存（系统也会在每次修改后自动保存）
+- 移动端：左摇杆移动 / 右侧滑动视角 / 按钮跳跃、破坏、放置、切换工具与模式

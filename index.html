@@ -56,6 +56,81 @@
               <p id="helpTool">F 键：切换工具</p>
               <p id="helpMode">V 键：切换生存/创造</p>
               <p id="helpSelect">数字键 1-9：选择方块类型</p>
+              <p id="helpTouchMove" class="mobile-hint">触控左摇杆：移动</p>
+              <p id="helpTouchLook" class="mobile-hint">触控右侧：观察 / 交互</p>
+              <p id="helpTouchActions" class="mobile-hint">触控按钮：跳跃、破坏、放置</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="lanPanel" class="lan-panel hidden" role="region" aria-live="polite">
+          <div class="lan-column">
+            <h2 id="lanHostTitle">Host a LAN world</h2>
+            <p id="lanHostHint" class="lan-hint">
+              Share the offer below with players on the same network.
+            </p>
+            <button id="lanCreateOffer" class="menu-button slim">Create Offer</button>
+            <textarea
+              id="lanOfferOutput"
+              class="lan-text"
+              readonly
+              placeholder="Offer will appear here"
+            ></textarea>
+            <div class="lan-actions">
+              <button id="lanCopyOffer" class="menu-button slim" type="button">
+                Copy Offer
+              </button>
+              <button id="lanClearOffer" class="menu-button slim" type="button">
+                Reset
+              </button>
+            </div>
+            <label for="lanAnswerInput" id="lanAnswerLabel" class="lan-hint"></label>
+            <textarea
+              id="lanAnswerInput"
+              class="lan-text"
+              placeholder="Paste answer from your friend here"
+            ></textarea>
+            <button id="lanAcceptAnswer" class="menu-button slim" type="button">
+              Apply Answer
+            </button>
+          </div>
+          <div class="lan-column">
+            <h2 id="lanJoinTitle">Join a LAN host</h2>
+            <p id="lanJoinHint" class="lan-hint">
+              Paste the offer from the host to generate your answer.
+            </p>
+            <label for="lanJoinOfferInput" id="lanJoinOfferLabel" class="lan-hint"></label>
+            <textarea
+              id="lanJoinOfferInput"
+              class="lan-text"
+              placeholder="Paste host offer here"
+            ></textarea>
+            <button id="lanGenerateAnswer" class="menu-button slim" type="button">
+              Generate Answer
+            </button>
+            <textarea
+              id="lanJoinAnswerOutput"
+              class="lan-text"
+              readonly
+              placeholder="Give this answer back to the host"
+            ></textarea>
+            <div class="lan-actions">
+              <button id="lanCopyAnswer" class="menu-button slim" type="button">
+                Copy Answer
+              </button>
+              <button id="lanClearJoin" class="menu-button slim" type="button">
+                Reset
+              </button>
+            </div>
+          </div>
+          <div class="lan-column status">
+            <h2 id="lanStatusTitle">Connection status</h2>
+            <p id="lanStatus" class="lan-status-text"></p>
+            <ul id="lanPeers" class="lan-peers"></ul>
+            <div class="lan-actions">
+              <button id="lanDisconnect" class="menu-button slim" type="button">
+                Disconnect
+              </button>
             </div>
           </div>
         </div>
@@ -88,6 +163,20 @@
         <div class="fill"></div>
       </div>
       <div id="saveStatus" class="save-status"></div>
+    </div>
+
+    <div id="mobileControls" class="mobile-controls hidden" aria-hidden="true">
+      <div class="joystick" id="movePad">
+        <div class="joystick-thumb" id="moveThumb"></div>
+      </div>
+      <div class="look-pad" id="lookPad"></div>
+      <div class="mobile-buttons">
+        <button id="jumpButton" class="mobile-button" type="button">Jump</button>
+        <button id="breakButton" class="mobile-button" type="button">Mine</button>
+        <button id="placeButton" class="mobile-button" type="button">Place</button>
+        <button id="toolButton" class="mobile-button" type="button">Tools</button>
+        <button id="modeButton" class="mobile-button" type="button">Mode</button>
+      </div>
     </div>
 
     <script type="module" src="src/main.js"></script>
