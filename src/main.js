@@ -54,7 +54,10 @@ renderer.setPixelRatio(
 );
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+
+const gameContainer = document.getElementById('gameContainer');
+const renderTarget = gameContainer ?? document.body;
+renderTarget.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
