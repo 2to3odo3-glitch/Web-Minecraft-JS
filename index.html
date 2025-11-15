@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Minecraft JS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="overlay" class="overlay">
+      <div class="overlay-content">
+        <div class="language-picker">
+          <label id="languageLabel" for="languageSelect"></label>
+          <select id="languageSelect"></select>
+        </div>
+
+        <div class="logo-wrapper">
+          <div class="minecraft-logo">
+            <span id="overlayTitle" class="logo-text">Minecraft</span>
+            <span id="splashText" class="splash-text">It's finished!</span>
+          </div>
+        </div>
+
+        <div class="menu-wrapper">
+          <div class="menu-column">
+            <button id="singleplayerButton" class="menu-button primary">
+              Singleplayer
+            </button>
+            <button id="multiplayerButton" class="menu-button">
+              Multiplayer
+            </button>
+            <button id="optionsButton" class="menu-button">
+              Options...
+            </button>
+            <button id="quitButton" class="menu-button">
+              Quit Game
+            </button>
+            <div id="menuStatus" class="menu-status"></div>
+          </div>
+          <div class="side-column">
+            <div class="mojang-emblem" aria-hidden="true">
+              <span class="mojang-word mark">MOJANG</span>
+              <span class="mojang-word studios">STUDIOS</span>
+            </div>
+            <div id="helpPanel" class="help-panel">
+              <h2 id="optionsTitle"></h2>
+              <p id="overlayIntro" class="help-subtitle"></p>
+              <p id="helpMouse">鼠标：视角</p>
+              <p id="helpMovement">WASD：移动，空格：跳跃</p>
+              <p id="helpSprint">Ctrl：冲刺，Shift（创造模式）：下降</p>
+              <p id="helpBreak">左键：破坏方块（生存需蓄力）</p>
+              <p id="helpPlace">右键：放置方块</p>
+              <p id="helpTool">F 键：切换工具</p>
+              <p id="helpMode">V 键：切换生存/创造</p>
+              <p id="helpSelect">数字键 1-9：选择方块类型</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">
+            <span id="editionLabel">Collector's Edition</span>
+            <span id="shaderLabel">FOR Shaders</span>
+          </div>
+          <div class="footer-right">
+            <span id="versionLabel">Minecraft 1.8.8</span>
+            <span id="resourceLabel">Resources: Mojang AB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hud" class="hud hidden">
+      <div class="crosshair"></div>
+      <div id="blockSelector" class="block-selector"></div>
+      <div class="hud-top-left">
+        <div id="modeIndicator" class="hud-badge"></div>
+        <div id="toolIndicator" class="hud-badge"></div>
+        <div class="hud-hints">
+          <span id="hudHintTool" class="hud-hint"></span>
+          <span id="hudHintMode" class="hud-hint"></span>
+        </div>
+      </div>
+      <div id="breakProgress" class="break-progress hidden">
+        <div class="fill"></div>
+      </div>
+      <div id="saveStatus" class="save-status"></div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
