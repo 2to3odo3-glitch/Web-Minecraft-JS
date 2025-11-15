@@ -39,6 +39,34 @@ const TRANSLATIONS = {
     shaderLabel: '支持着色器',
     versionLabel: 'Minecraft 1.8.8',
     resourceLabel: '资源来源：Mojang AB',
+    highlightsTitle: 'Minecraft 精彩看点',
+    highlightsIntro: '在进游戏前先获取灵感，规划你的下一次冒险。',
+    highlightAction: '了解详情',
+    highlightBiomesTitle: '探索多彩群系',
+    highlightBiomesText: '从雪山到繁茂洞穴，收集各类方块与生物材料。',
+    highlightBiomesStatus: '准备好火把和食物，就能安心探索新的群系。',
+    highlightRedstoneTitle: '红石实验室',
+    highlightRedstoneText: '用红石粉、活塞与侦测器搭建自动化设施与秘密机关。',
+    highlightRedstoneStatus: '红石回路加入计划，别忘了囤好石英和铁锭。',
+    highlightNetherTitle: '下界远征',
+    highlightNetherText: '穿过传送门，挑战堡垒与遗迹，收集萤石和地狱疣。',
+    highlightNetherStatus: '携带耐火药水与附魔弓，安全探索炽热的下界。',
+    tipTitle: '冒险小贴士',
+    tipLead: '这些 Minecraft 提示可以帮助你更快上手。',
+    tipRefresh: '换一个',
+    tipStatusRefreshed: '新的冒险灵感已准备就绪！',
+    tipRedstone: '用中继器延长红石信号，为自动门和农场提供稳定脉冲。',
+    tipFarming: '用骨粉催熟农作物，并用堆肥桶回收多余的植物方块。',
+    tipExploration: '在出生点附近竖立高塔或放置独特方块，方便回家。',
+    tipDefense: '盾牌能格挡大部分远程攻击，记得随时维修它的耐久。',
+    tipTrading: '与村民交易前先治疗僵尸村民，可获得超优惠的折扣。',
+    timelineTitle: 'Minecraft 里程碑',
+    timelineIntro: '回顾塑造方块宇宙的代表性更新。',
+    timelineAlpha: '2009 年：Alpha 版本奠定了无限世界与生存玩法的核心。',
+    timelineAdventure: '2011 年：“冒险更新”加入饥饿值、要塞与下界传送门。',
+    timelineEnd: '2016 年：“末路之诗”更新带来了鞘翅与神秘的末地城。',
+    timelineNether:
+      '2020 年：“下界更新”引入猪灵、堡垒遗迹与坚固的下界合金装备。',
     multiplayerUnavailable: '目前仅支持单人模式，敬请期待！',
     quitUnavailable: '网页无法直接退出，请关闭或刷新页面。',
     playOnlineStatus: '将在新标签页打开在线版本。',
@@ -127,6 +155,34 @@ const TRANSLATIONS = {
     shaderLabel: '支援著色器',
     versionLabel: 'Minecraft 1.8.8',
     resourceLabel: '資源來源：Mojang AB',
+    highlightsTitle: 'Minecraft 精彩亮點',
+    highlightsIntro: '在進入世界前先找些靈感，規劃下一趟冒險。',
+    highlightAction: '了解詳情',
+    highlightBiomesTitle: '探索多變群系',
+    highlightBiomesText: '從雪山到繁茂洞穴，蒐集各式方塊與生物材料。',
+    highlightBiomesStatus: '記得準備火把與食物，就能安心探索新群系。',
+    highlightRedstoneTitle: '紅石實驗室',
+    highlightRedstoneText: '利用紅石粉、活塞與偵測器打造自動化設施與機關。',
+    highlightRedstoneStatus: '紅石迴路加入清單，別忘了囤好石英和鐵錠。',
+    highlightNetherTitle: '地獄遠征',
+    highlightNetherText: '穿越傳送門挑戰堡壘與殘骸，收集熒石與地獄疣。',
+    highlightNetherStatus: '帶上抗火藥水與附魔弓，安全深入炙熱的地獄。',
+    tipTitle: '冒險小祕訣',
+    tipLead: '這些 Minecraft 建議能讓你更快熟悉世界。',
+    tipRefresh: '換一則',
+    tipStatusRefreshed: '新的冒險靈感已經就緒！',
+    tipRedstone: '用紅石中繼器延長訊號，讓自動門與農場維持穩定脈衝。',
+    tipFarming: '使用骨粉加速作物生長，並善用堆肥桶回收多餘植物方塊。',
+    tipExploration: '在出生點附近豎立高塔或放置特殊方塊，方便辨識回家的方向。',
+    tipDefense: '盾牌能格擋多數遠程攻擊，別忘了維修它的耐久度。',
+    tipTrading: '在交易前先治癒殭屍村民，就能獲得大幅折扣。',
+    timelineTitle: 'Minecraft 里程碑',
+    timelineIntro: '回顧塑造方塊宇宙的經典更新。',
+    timelineAlpha: '2009 年：Alpha 版奠定了無限世界與生存玩法的基礎。',
+    timelineAdventure: '2011 年：「冒險更新」加入飢餓值、要塞以及下界傳送門。',
+    timelineEnd: '2016 年：「終界之詩」更新帶來鞘翅與神秘的終界城。',
+    timelineNether:
+      '2020 年：「地獄更新」引入豬靈、遺跡與堅固的獄髓裝備。',
     multiplayerUnavailable: '目前僅支援單人模式，敬請期待！',
     quitUnavailable: '無法直接離開網頁，請關閉或重新整理。',
     playOnlineStatus: '即將在新分頁開啟線上版本。',
@@ -215,6 +271,46 @@ const TRANSLATIONS = {
     shaderLabel: 'FOR Shaders',
     versionLabel: 'Minecraft 1.8.8',
     resourceLabel: 'Resources: Mojang AB',
+    highlightsTitle: 'Minecraft Highlights',
+    highlightsIntro: 'Gather inspiration before you punch your first tree.',
+    highlightAction: 'Learn more',
+    highlightBiomesTitle: 'Explore Diverse Biomes',
+    highlightBiomesText:
+      'Roam snowy peaks, lush caves, and warm oceans to stock up on resources.',
+    highlightBiomesStatus:
+      'Tip saved: pack torches and snacks before venturing into a new biome.',
+    highlightRedstoneTitle: 'Redstone Workshop',
+    highlightRedstoneText:
+      'Wire dust, pistons, and observers together to automate your base.',
+    highlightRedstoneStatus:
+      'Redstone contraptions queued up—keep quartz and iron on hand.',
+    highlightNetherTitle: 'Nether Expedition',
+    highlightNetherText:
+      'Step through the portal for blaze rods, glowstone, and risky treasure.',
+    highlightNetherStatus:
+      'Bring fire resistance potions and a trusty bow before braving the Nether.',
+    tipTitle: "Adventurer's Tip",
+    tipLead: 'Keep these Minecraft pointers handy as you explore.',
+    tipRefresh: 'Next tip',
+    tipStatusRefreshed: 'New adventure idea unlocked!',
+    tipRedstone:
+      'Use repeaters to extend redstone signals and keep auto farms clocked.',
+    tipFarming:
+      'Bone meal speeds crop growth; compost extra plants for more bonemeal.',
+    tipExploration:
+      'Mark spawn with a tall pillar or unique block to navigate home.',
+    tipDefense:
+      'Shields block most projectiles—repair them often to stay safe underground.',
+    tipTrading: 'Cure a zombie villager for massive discounts before trading.',
+    timelineTitle: 'Minecraft Milestones',
+    timelineIntro: 'A quick tour of updates that defined the blocky universe.',
+    timelineAlpha: '2009: Alpha laid the groundwork for infinite worlds and survival.',
+    timelineAdventure:
+      '2011: The Adventure Update added hunger, strongholds, and the Nether.',
+    timelineEnd:
+      '2016: The End update introduced elytra flights and End Cities.',
+    timelineNether:
+      '2020: The Nether Update delivered piglins, bastions, and netherite gear.',
     multiplayerUnavailable: 'Multiplayer is not implemented yet.',
     quitUnavailable: 'Quit closes the tab in the real game — refresh to exit here.',
     playOnlineStatus: 'Opening the hosted build in a new tab…',
@@ -303,6 +399,46 @@ const TRANSLATIONS = {
     shaderLabel: 'FOR Shaders',
     versionLabel: 'Minecraft 1.8.8',
     resourceLabel: 'Resources: Mojang AB',
+    highlightsTitle: 'Minecraft Highlights',
+    highlightsIntro: 'Gather a little inspiration before punching your first tree.',
+    highlightAction: 'Learn more',
+    highlightBiomesTitle: 'Explore Diverse Biomes',
+    highlightBiomesText:
+      'Roam snow-capped peaks, lush caves, and warm oceans to restock supplies.',
+    highlightBiomesStatus:
+      'Top tip: pack torches and plenty of food before entering a new biome.',
+    highlightRedstoneTitle: 'Redstone Workshop',
+    highlightRedstoneText:
+      'Link dust, pistons, and observers to automate your home.',
+    highlightRedstoneStatus:
+      'Redstone builds lined up—keep quartz and iron at the ready.',
+    highlightNetherTitle: 'Nether Expedition',
+    highlightNetherText:
+      'Step through the portal for blaze rods, glowstone, and daring loot.',
+    highlightNetherStatus:
+      'Carry fire-resistance potions and a reliable bow before braving the Nether.',
+    tipTitle: 'Adventurer’s Tip',
+    tipLead: 'Keep these Minecraft hints in mind on your travels.',
+    tipRefresh: 'Next tip',
+    tipStatusRefreshed: 'Fresh inspiration unlocked!',
+    tipRedstone:
+      'Use repeaters to stretch redstone signals and keep automatic farms ticking.',
+    tipFarming:
+      'Bone meal crops and compost spare plants to maintain your supplies.',
+    tipExploration:
+      'Mark spawn with a tall tower or distinctive block to find your way home.',
+    tipDefense:
+      'A shield stops most incoming arrows—repair it regularly underground.',
+    tipTrading: 'Heal a zombie villager before trading for hefty discounts.',
+    timelineTitle: 'Minecraft Milestones',
+    timelineIntro: 'A whistle-stop tour of the updates that shaped the Overworld.',
+    timelineAlpha: '2009: Alpha established limitless worlds and survival gameplay.',
+    timelineAdventure:
+      '2011: The Adventure Update ushered in hunger, strongholds, and the Nether.',
+    timelineEnd:
+      '2016: The End update brought elytra gliding and mysterious End Cities.',
+    timelineNether:
+      '2020: The Nether Update added piglins, bastions, and netherite equipment.',
     multiplayerUnavailable: 'Multiplayer has not been added yet.',
     quitUnavailable: 'Quit would close the window — refresh the page instead.',
     playOnlineStatus: 'Opening the hosted build in a new tab…',
