@@ -1,0 +1,144 @@
+export const SUPPORTED_LANGUAGES = [
+  { code: 'zh-CN', label: '简体中文 (Simplified Chinese)' },
+  { code: 'zh-TW', label: '繁體中文 (Traditional Chinese)' },
+  { code: 'en-US', label: 'English (US)' },
+  { code: 'en-GB', label: 'English (UK)' },
+];
+
+export const DEFAULT_LANGUAGE = 'zh-CN';
+
+const TRANSLATIONS = {
+  'zh-CN': {
+    overlayTitle: 'Minecraft',
+    splashText: '大功告成！',
+    overlayIntro: '点击「单人游戏」进入这个实验性世界。',
+    menuSingleplayer: '单人游戏',
+    menuMultiplayer: '多人游戏',
+    menuOptions: '选项…',
+    menuQuit: '退出游戏',
+    optionsTitle: '控制方式',
+    languageLabel: '语言 / Language',
+    helpMouse: '鼠标：视角',
+    helpMovement: 'WASD：移动，空格：上升，Shift：下降',
+    helpBreak: '左键：破坏方块',
+    helpPlace: '右键：放置方块',
+    helpSelect: '数字键 1-{maxBlock}：选择方块类型',
+    saveSuccess: '已保存世界',
+    saveError: '无法保存：本地存储不可用',
+    welcome: '欢迎来到方块世界',
+    blockOption: '{index}. {label}',
+    editionLabel: '典藏版',
+    shaderLabel: '支持着色器',
+    versionLabel: 'Minecraft 1.8.8',
+    resourceLabel: '资源来源：Mojang AB',
+    multiplayerUnavailable: '目前仅支持单人模式，敬请期待！',
+    quitUnavailable: '网页无法直接退出，请关闭或刷新页面。',
+    optionsShown: '已显示控制说明。',
+    optionsHidden: '已隐藏控制说明。',
+  },
+  'zh-TW': {
+    overlayTitle: 'Minecraft',
+    splashText: '大功告成！',
+    overlayIntro: '點擊「單人遊戲」進入這個實驗性世界。',
+    menuSingleplayer: '單人遊戲',
+    menuMultiplayer: '多人遊戲',
+    menuOptions: '選項…',
+    menuQuit: '結束遊戲',
+    optionsTitle: '操作方式',
+    languageLabel: '語言 / Language',
+    helpMouse: '滑鼠：視角',
+    helpMovement: 'WASD：移動，空白鍵：上升，Shift：下降',
+    helpBreak: '左鍵：破壞方塊',
+    helpPlace: '右鍵：放置方塊',
+    helpSelect: '數字鍵 1-{maxBlock}：選擇方塊類型',
+    saveSuccess: '世界已儲存',
+    saveError: '無法儲存：無法使用本機儲存空間',
+    welcome: '歡迎來到方塊世界',
+    blockOption: '{index}. {label}',
+    editionLabel: '典藏版',
+    shaderLabel: '支援著色器',
+    versionLabel: 'Minecraft 1.8.8',
+    resourceLabel: '資源來源：Mojang AB',
+    multiplayerUnavailable: '目前僅支援單人模式，敬請期待！',
+    quitUnavailable: '無法直接離開網頁，請關閉或重新整理。',
+    optionsShown: '已顯示操作說明。',
+    optionsHidden: '已隱藏操作說明。',
+  },
+  'en-US': {
+    overlayTitle: 'Minecraft',
+    splashText: "It's finished!",
+    overlayIntro: 'Click “Singleplayer” to jump into this experimental world.',
+    menuSingleplayer: 'Singleplayer',
+    menuMultiplayer: 'Multiplayer',
+    menuOptions: 'Options...',
+    menuQuit: 'Quit Game',
+    optionsTitle: 'Controls',
+    languageLabel: 'Language',
+    helpMouse: 'Mouse: Look around',
+    helpMovement: 'WASD: Move, Space: Ascend, Shift: Descend',
+    helpBreak: 'Left Click: Break block',
+    helpPlace: 'Right Click: Place block',
+    helpSelect: 'Number Keys 1-{maxBlock}: Select block type',
+    saveSuccess: 'World saved',
+    saveError: 'Unable to save: localStorage not available',
+    welcome: 'Welcome to the voxel world',
+    blockOption: '{index}. {label}',
+    editionLabel: "Collector's Edition",
+    shaderLabel: 'FOR Shaders',
+    versionLabel: 'Minecraft 1.8.8',
+    resourceLabel: 'Resources: Mojang AB',
+    multiplayerUnavailable: 'Multiplayer is not implemented yet.',
+    quitUnavailable: 'Quit closes the tab in the real game — refresh to exit here.',
+    optionsShown: 'Control guide opened.',
+    optionsHidden: 'Control guide hidden.',
+  },
+  'en-GB': {
+    overlayTitle: 'Minecraft',
+    splashText: "It's finished!",
+    overlayIntro: 'Click “Singleplayer” to explore this experimental world.',
+    menuSingleplayer: 'Singleplayer',
+    menuMultiplayer: 'Multiplayer',
+    menuOptions: 'Options...',
+    menuQuit: 'Quit Game',
+    optionsTitle: 'Controls',
+    languageLabel: 'Language',
+    helpMouse: 'Mouse: Adjust view',
+    helpMovement: 'WASD: Move, Space: Ascend, Shift: Descend',
+    helpBreak: 'Left Click: Break block',
+    helpPlace: 'Right Click: Place block',
+    helpSelect: 'Number Keys 1-{maxBlock}: Choose block type',
+    saveSuccess: 'World saved',
+    saveError: 'Unable to save: local storage unavailable',
+    welcome: 'Welcome to the voxel world',
+    blockOption: '{index}. {label}',
+    editionLabel: "Collector's Edition",
+    shaderLabel: 'FOR Shaders',
+    versionLabel: 'Minecraft 1.8.8',
+    resourceLabel: 'Resources: Mojang AB',
+    multiplayerUnavailable: 'Multiplayer has not been added yet.',
+    quitUnavailable: 'Quit would close the window — refresh the page instead.',
+    optionsShown: 'Control guide opened.',
+    optionsHidden: 'Control guide hidden.',
+  },
+};
+
+export function getStrings(locale) {
+  return TRANSLATIONS[locale] ?? TRANSLATIONS[DEFAULT_LANGUAGE];
+}
+
+export function getMessage(locale, key, replacements = {}) {
+  const baseStrings = getStrings(locale);
+  const fallbackStrings = getStrings(DEFAULT_LANGUAGE);
+  const template = baseStrings[key] ?? fallbackStrings[key] ?? '';
+  return template.replace(/\{(\w+)\}/g, (match, name) => {
+    return Object.prototype.hasOwnProperty.call(replacements, name)
+      ? String(replacements[name])
+      : match;
+  });
+}
+
+export function validateLanguage(code) {
+  return SUPPORTED_LANGUAGES.some((lang) => lang.code === code)
+    ? code
+    : DEFAULT_LANGUAGE;
+}
