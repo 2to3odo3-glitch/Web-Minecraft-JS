@@ -45,6 +45,9 @@ const TOOLS = [
   { id: 'shears', type: 'shears', speed: 1.2, efficiency: 3.1, labelKey: 'toolShears' },
 ];
 
+let lanMultiplayer = null;
+let currentPeerList = [];
+
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setPixelRatio(
   Math.min(window.devicePixelRatio ?? 1, isMobileDevice ? 1.75 : 2.5)
@@ -300,7 +303,6 @@ const mobileMoveVector = { x: 0, y: 0 };
 let mobileJumpQueued = false;
 let mobileGameplayActive = false;
 let lanPanelVisible = false;
-let lanMultiplayer = null;
 const remotePlayers = new Map();
 const remoteMaterialCache = new Map();
 const remotePlayerGeometry = new THREE.BoxGeometry(
@@ -308,7 +310,6 @@ const remotePlayerGeometry = new THREE.BoxGeometry(
   PLAYER_HEIGHT,
   PLAYER_WIDTH
 );
-let currentPeerList = [];
 let lastHostOfferId = null;
 let lastClientOfferId = null;
 let lastLanStatusKey = 'lanStatusIdle';

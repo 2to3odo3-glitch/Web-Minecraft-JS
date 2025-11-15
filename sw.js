@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'voxel-cache-v2';
+const CACHE_VERSION = 'voxel-cache-v3';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const PRECACHE_URLS = [
   './three/build/three.module.js',
   './three/examples/jsm/controls/PointerLockControls.js',
   './three/examples/jsm/math/ImprovedNoise.js',
+  './favicon.svg',
 ];
 
 self.addEventListener('install', (event) => {
