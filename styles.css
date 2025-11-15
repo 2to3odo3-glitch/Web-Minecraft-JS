@@ -32,6 +32,36 @@ body {
   padding: 24px;
 }
 
+.language-picker {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.language-picker label {
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.language-picker select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 .overlay h1 {
   margin: 0;
   font-size: 2.5rem;
